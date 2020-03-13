@@ -28,6 +28,16 @@ if (!is_writable($path)) {
     exit;
 }
 
+echo "$colorBlue Getting composer version" . \PHP_EOL;
+if (preg_match('/version (?P<version>.*?) /', `composer --version 2>&1`, $matches)) {
+    if (empty($matches['version'])) {
+        echo "$colorRed Could not find composer!$colorClear" . \PHP_EOL;
+        exit;
+    } else {
+        echo "$colorBlue Found composer version $colorYellow ${matches['version']}$colorClear" . \PHP_EOL;
+    }
+}
+
 $deps = ['magento/ece-tools' => '^2002.1.0'];
 
 $vendors = scandir('app/code');
@@ -123,7 +133,13 @@ $composer['replace'] = [
 ];
 file_put_contents('composer.json', json_encode($composer, JSON_PRETTY_PRINT));
 
+echo "$colorBlue Running composer update $colorClear." . \PHP_EOL;
+`composer update --ansi --no-interaction`;
+echo "$colorBlue Running $colorYellow php vendor/bin/ece-tools dev:git:update-composer $colorClear" . \PHP_EOL;
+$bin = PHP_BINARY;
+`{$bin} vendor/bin/ece-tools dev:git:update-composer`;
+$mainlineComposer = json_decode(file_get_contents('cloud_tmp/composer.json'), true);
+$localComposer = json_decode(file_get_contents('composer.json'), true);
+$localComposer['autoload'] = $mainlineComposer['autoload'];
+file_put_contents('composer.json', json_encode($localComposer, JSON_PRETTY_PRINT));
 echo "$colorGreen Complete! $colorClear" . \PHP_EOL;
-echo "$colorBlue Please run $colorYellow composer update $colorBlue and $colorYellow php vendor/bin/ece-tools dev:git:update-composer $colorClear" . \PHP_EOL;
-
-

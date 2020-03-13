@@ -1,7 +1,7 @@
 When the cloud just don't work no moe.
 =====
 
-This will delete everything except for `auth.json`, `.git`, `.magento.env.yaml`, and `app/` and reset your cloud project with a fresh mainline copy that is configured for the git-based workflow and also add any non-magento dependencies from your `composer.json` files found within `app/code/` modules. 
+This will delete everything except for `auth.json`, `.git`, `.magento.env.yaml`, and `app/` and reset your cloud project with a fresh mainline copy that is configured for the git-based workflow and also add any non-magento dependencies from your `composer.json` files found within `app/code/` modules. It will then run composer update as well as `ece-tools dev:git:update-composer` followed by additional configuration of `composer.json` 
 
 ### Usage:
 
@@ -13,4 +13,4 @@ You can exclude additional directories via the `--exclude` flag. e.g. `php nuke-
 
 You may optionally provide a directory to run in: `php nuke-cloud.php my-path/to/mage-cloud`
 
-Once the command has finished and you have run `composer update`, make sure your `.magento.env.yaml` configuration is what you want to deploy before you run `dev:git:update-composer`.
+Make sure you have modified your `.magento.env.yaml` configuration before running this tool.
