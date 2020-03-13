@@ -1,7 +1,7 @@
 <?php
 $opts = getopt('', ['exclude:'], $firstPositionalArgIndex);
 $path = getcwd();
-$excludedDirs = ['cloud_tmp', '.git', 'auth.json', '.magento.env.yaml', '.', '..'];
+$excludedDirs = ['cloud_tmp', '.git', 'auth.json', 'app', '.magento.env.yaml', '.', '..'];
 $colorRed = "\e[0;31m";
 $colorBlue = "\e[0;34m";
 $colorGreen = "\e[0;32m";
@@ -27,6 +27,24 @@ if (!is_writable($path)) {
     echo "$colorRed Directory is not writable!$colorClear" . \PHP_EOL;
     exit;
 }
+
+$deps = ['magento/ece-tools' => '^2002.1.0'];
+
+$vendors = scandir('app/code');
+if (is_dir('app/code')) {
+    $files = glob('app/code/*/*/composer.json');
+    foreach ($files as $file) {
+        $composer = json_decode(file_get_contents($file), true);
+        if (!empty($composer['require'])) {
+            foreach($composer['require'] as $dep => $version) {
+                if (strpos($dep, 'magento/') !== 0 && $dep !== 'php') {
+                    $deps[$dep] = $version;
+                }
+            }
+        }
+    }
+}
+
 if (!empty($opts['exclude'])) {
     if (!is_array($opts['exclude'])) {
         $opts['exclude'] = [$opts['exclude']];
@@ -99,9 +117,7 @@ $composer['repositories'] = [
     ]
 ];
 unset($composer['autoload']);
-$composer['require'] = [
-    'magento/ece-tools' => '^2002.1.0'
-];
+$composer['require'] = $deps;
 $composer['replace'] = [
     'magento/magento-cloud-components' => '*'
 ];
