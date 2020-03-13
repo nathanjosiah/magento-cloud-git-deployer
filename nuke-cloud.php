@@ -1,14 +1,16 @@
 <?php
+$opts = getopt('', ['exclude:'], $firstPositionalArgIndex);
 $path = getcwd();
+$excludedDirs = ['cloud_tmp', '.git', 'auth.json', '.magento.env.yaml', '.', '..'];
 $colorRed = "\e[0;31m";
 $colorBlue = "\e[0;34m";
 $colorGreen = "\e[0;32m";
 $colorYellow = "\e[1;33m";
 $colorClear = "\e[0m";
 
-if (!empty($argv[1])) {
-    echo "$colorBlue Directory $colorYellow ${argv[1]} $colorBlue given.$colorClear" . \PHP_EOL;
-    $path = realpath($argv[1]);
+if (!empty($argv[$firstPositionalArgIndex])) {
+    echo "$colorBlue Running in $colorYellow ${argv[$firstPositionalArgIndex]}$colorClear" . \PHP_EOL;
+    $path = realpath($argv[$firstPositionalArgIndex]);
     if ($path) {
         echo "$colorBlue Resolved to $colorYellow $path $colorClear" . \PHP_EOL;
     } else {
@@ -18,12 +20,36 @@ if (!empty($argv[1])) {
 } else {
     echo "$colorBlue No path provided. Using working directory $colorYellow $path $colorClear" . \PHP_EOL;
 }
+
+chdir($path);
+
 if (!is_writable($path)) {
     echo "$colorRed Directory is not writable!$colorClear" . \PHP_EOL;
     exit;
 }
-
-chdir($path);
+if (!empty($opts['exclude'])) {
+    if (!is_array($opts['exclude'])) {
+        $opts['exclude'] = [$opts['exclude']];
+    }
+    $error = false;
+    foreach ($opts['exclude'] as $excludePath) {
+        $excludeRealPath = realpath($excludePath);
+        if (!$excludeRealPath || !file_exists($excludeRealPath)) {
+            echo "$colorRed Excluded path $colorYellow $excludePath $colorBlue does not exist $colorClear." . \PHP_EOL;
+            $error = true;
+        } else {
+            if (strpos($excludeRealPath, $path) !== 0) {
+                echo "$colorRed Exclude path isn't in project directory. $colorClear" . \PHP_EOL;
+                $error = true;
+            } else {
+                $excludedDirs[] = substr($excludeRealPath, strlen($path) + 1);
+            }
+        }
+    }
+    if ($error) {
+        return;
+    }
+}
 
 if (file_exists($path . '/cloud_tmp')) {
     echo "$colorBlue Found existing cloud_tmp folder. Deleting.$colorClear" . \PHP_EOL;
@@ -47,7 +73,7 @@ register_shutdown_function(function() use ($path, $colorRed, $colorClear) {
     }
 });
 
-$keep = implode('" -not -name "' , ['cloud_tmp', '.git', 'auth.json', '.magento.env.yaml', '.', '..']);
+$keep = implode('" -not -name "' , $excludedDirs);
 echo "$colorBlue Purging folder of all but minimum files. $colorClear" . \PHP_EOL;
 `find . -maxdepth 1 -not -name "$keep" -exec rm -rf {} +`;
 echo "$colorBlue Transferring mainline files. $colorClear" . \PHP_EOL;
