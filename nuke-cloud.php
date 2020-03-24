@@ -138,6 +138,7 @@ echo "$colorBlue Running composer update $colorClear." . \PHP_EOL;
 echo "$colorBlue Running $colorYellow php vendor/bin/ece-tools dev:git:update-composer $colorClear" . \PHP_EOL;
 $bin = PHP_BINARY;
 `{$bin} vendor/bin/ece-tools dev:git:update-composer`;
+echo "$colorBlue Fixing composer autoloader settings $colorClear." . \PHP_EOL;
 $mainlineComposer = json_decode(file_get_contents('cloud_tmp/composer.json'), true);
 $localComposer = json_decode(file_get_contents('composer.json'), true);
 $localComposer['autoload'] = $mainlineComposer['autoload'];
