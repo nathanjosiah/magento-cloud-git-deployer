@@ -38,22 +38,24 @@ if (preg_match('/version (?P<version>.*?) /', `composer --version 2>&1`, $matche
     }
 }
 
-$deps = ['magento/ece-tools' => '^2002.1.0'];
+//$deps = ['magento/ece-tools' => '^2002.1.0'];
+$deps = ['magento/ece-tools' => 'dev-develop'];
 
 $vendors = scandir('app/code');
-if (is_dir('app/code')) {
-    $files = glob('app/code/*/*/composer.json');
-    foreach ($files as $file) {
-        $composer = json_decode(file_get_contents($file), true);
-        if (!empty($composer['require'])) {
-            foreach($composer['require'] as $dep => $version) {
-                if (strpos($dep, 'magento/') !== 0 && $dep !== 'php') {
-                    $deps[$dep] = $version;
-                }
-            }
-        }
-    }
-}
+
+//if (is_dir('app/code')) {
+//    $files = glob('app/code/*/*/composer.json');
+//    foreach ($files as $file) {
+//        $composer = json_decode(file_get_contents($file), true);
+//        if (!empty($composer['require'])) {
+//            foreach($composer['require'] as $dep => $version) {
+//                if (strpos($dep, 'magento/') !== 0 && $dep !== 'php') {
+//                    $deps[$dep] = $version;
+//                }
+//            }
+//        }
+//    }
+//}
 
 if (!empty($opts['exclude'])) {
     if (!is_array($opts['exclude'])) {
@@ -135,6 +137,10 @@ file_put_contents('composer.json', json_encode($composer, JSON_PRETTY_PRINT));
 
 echo "$colorBlue Running composer update $colorClear." . \PHP_EOL;
 `composer update --ansi --no-interaction`;
+$composerPretty = json_encode($composer, JSON_PRETTY_PRINT);
+$composerCopyPath = realpath('.') . '/original-composer.json';
+file_put_contents($composerCopyPath, $composerPretty);
+echo "$colorBlue Saving copy of composer.json before dev:git:update-composer to $colorYellow $composerCopyPath $colorClear" . \PHP_EOL;
 echo "$colorBlue Running $colorYellow php vendor/bin/ece-tools dev:git:update-composer $colorClear" . \PHP_EOL;
 $bin = PHP_BINARY;
 `{$bin} vendor/bin/ece-tools dev:git:update-composer`;
@@ -142,5 +148,7 @@ echo "$colorBlue Fixing composer autoloader settings $colorClear." . \PHP_EOL;
 $mainlineComposer = json_decode(file_get_contents('cloud_tmp/composer.json'), true);
 $localComposer = json_decode(file_get_contents('composer.json'), true);
 $localComposer['autoload'] = $mainlineComposer['autoload'];
-file_put_contents('composer.json', json_encode($localComposer, JSON_PRETTY_PRINT));
+$localComposerPretty = json_encode($localComposer, JSON_PRETTY_PRINT);
+echo "$colorBlue composer.json after dev:git:update-composer and autoload fix $colorYellow $localComposerPretty $colorClear" . \PHP_EOL;
+file_put_contents('composer.json', $localComposerPretty);
 echo "$colorGreen Complete! $colorClear" . \PHP_EOL;
