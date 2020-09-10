@@ -41,7 +41,7 @@ if (preg_match('/version (?P<version>.*?) /', `composer --version 2>&1`, $matche
 //$deps = ['magento/ece-tools' => '^2002.1.0'];
 $deps = ['magento/ece-tools' => 'dev-develop'];
 
-$vendors = scandir('app/code');
+$vendors = @scandir('app/code');
 
 //if (is_dir('app/code')) {
 //    $files = glob('app/code/*/*/composer.json');
@@ -126,6 +126,10 @@ $composer['repositories'] = [
     'magento-cloud-docker' => [
        'type' => 'git',
        'url' => 'git@github.com:magento/magento-cloud-docker.git'
+    ],
+    'quality-patches' => [
+       'type' => 'git',
+       'url' => 'git@github.com:magento/quality-patches.git'
     ]
 ];
 unset($composer['autoload']);
