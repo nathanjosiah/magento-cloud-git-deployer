@@ -38,8 +38,8 @@ if (preg_match('/version (?P<version>.*?) /', `composer --version 2>&1`, $matche
     }
 }
 
-//$deps = ['magento/ece-tools' => '^2002.1.0'];
-$deps = ['magento/ece-tools' => 'dev-develop'];
+$deps = ['magento/ece-tools' => '=2002.1.2'];
+//$deps = ['magento/ece-tools' => 'dev-develop'];
 
 $vendors = @scandir('app/code');
 
