@@ -3,7 +3,7 @@
 use Symfony\Component\Yaml\Yaml;
 
 require_once __DIR__ . '/vendor/autoload.php';
-$opts = getopt('', ['exclude:'], $firstPositionalArgIndex);
+$opts = getopt('', ['exclude:','laminas-fix'], $firstPositionalArgIndex);
 $path = getcwd();
 $excludedDirs = ['cloud_tmp', '.git', 'auth.json', 'app', '.magento.env.yaml', '.', '..'];
 $colorRed = "\e[0;31m";
@@ -142,6 +142,10 @@ $composer['require'] = $deps;
 $composer['replace'] = [
     'magento/magento-cloud-components' => '*'
 ];
+
+if (isset($opts['laminas-fix'])) {
+    $composer['require']['laminas/laminas-escaper'] = '2.7.0';
+}
 
 if ($composer2) {
     echo "$colorBlue Configuring for composer 2. $colorClear" . \PHP_EOL;
