@@ -1,4 +1,8 @@
 <?php
+
+use Symfony\Component\Yaml\Yaml;
+
+require_once __DIR__ . '/vendor/autoload.php';
 $opts = getopt('', ['exclude:'], $firstPositionalArgIndex);
 $path = getcwd();
 $excludedDirs = ['cloud_tmp', '.git', 'auth.json', 'app', '.magento.env.yaml', '.', '..'];
@@ -37,9 +41,10 @@ if (preg_match('/version (?P<version>.*?) /', `composer --version 2>&1`, $matche
         echo "$colorBlue Found composer version $colorYellow ${matches['version']}$colorClear" . \PHP_EOL;
     }
 }
+$composer2 = (int)$matches['version'] === 2;
 
-$deps = ['magento/ece-tools' => '=2002.1.2'];
-//$deps = ['magento/ece-tools' => 'dev-develop'];
+//$deps = ['magento/ece-tools' => '=2002.1.2'];
+$deps = ['magento/ece-tools' => 'dev-develop'];
 
 $vendors = @scandir('app/code');
 
@@ -137,14 +142,28 @@ $composer['require'] = $deps;
 $composer['replace'] = [
     'magento/magento-cloud-components' => '*'
 ];
+
+if ($composer2) {
+    echo "$colorBlue Configuring for composer 2. $colorClear" . \PHP_EOL;
+    $appYaml = Yaml::parseFile($path . '/.magento.app.yaml');
+    $appYaml['build']['flavor'] = 'none';
+    $appYaml['dependencies']['php']['composer/composer'] = '^2.0';
+    $appYaml['hooks']['build'] = 'set -e
+        composer --no-ansi --no-interaction install --no-progress --prefer-dist --optimize-autoloader';
+    file_put_contents($path . '/.magento.app.yaml', Yaml::dump($appYaml));
+}
+else {
+    echo "$colorBlue Using composer 1. $colorClear" . \PHP_EOL;
+}
+
 file_put_contents('composer.json', json_encode($composer, JSON_PRETTY_PRINT));
 
 echo "$colorBlue Running composer update $colorClear." . \PHP_EOL;
 `composer update --ansi --no-interaction`;
 $composerPretty = json_encode($composer, JSON_PRETTY_PRINT);
 $composerCopyPath = realpath('.') . '/original-composer.json';
-file_put_contents($composerCopyPath, $composerPretty);
 echo "$colorBlue Saving copy of composer.json before dev:git:update-composer to $colorYellow $composerCopyPath $colorClear" . \PHP_EOL;
+file_put_contents($composerCopyPath, $composerPretty);
 echo "$colorBlue Running $colorYellow php vendor/bin/ece-tools dev:git:update-composer $colorClear" . \PHP_EOL;
 $bin = PHP_BINARY;
 `{$bin} vendor/bin/ece-tools dev:git:update-composer`;
@@ -153,6 +172,6 @@ $mainlineComposer = json_decode(file_get_contents('cloud_tmp/composer.json'), tr
 $localComposer = json_decode(file_get_contents('composer.json'), true);
 $localComposer['autoload'] = $mainlineComposer['autoload'];
 $localComposerPretty = json_encode($localComposer, JSON_PRETTY_PRINT);
-echo "$colorBlue composer.json after dev:git:update-composer and autoload fix $colorYellow $localComposerPretty $colorClear" . \PHP_EOL;
+echo "$colorBlue composer.json after dev:git:update-composer saved to composer.json$colorClear" . \PHP_EOL;
 file_put_contents('composer.json', $localComposerPretty);
 echo "$colorGreen Complete! $colorClear" . \PHP_EOL;

@@ -5,6 +5,8 @@ This will delete everything except for `auth.json`, `.git`, `.magento.env.yaml`,
 
 ### Usage:
 
+Install composer dependencies.
+
 Run `php nuke-cloud.php` _from within your local folder containing your cloud environment git repo to be nuked_
 
 You can exclude additional directories via the `--exclude` flag. e.g. `php nuke-cloud.php --exclude app --exclude special my-project/path`. Note that this currently can only exclude top-level directories so if you want to exclude `foo/bar/baz` you have to specific `--exclude foo`.
