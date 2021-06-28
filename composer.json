@@ -1,5 +1,18 @@
 {
+  "name": "magento/magento-cloud-git-deployer",
+  "autoload": {
+    "psr-4": {
+      "Magento\\": "src/Magento/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Nathan Smith",
+      "email": "nathsmit@adobe.com"
+    }
+  ],
   "require": {
+    "symfony/console": "^5.0",
     "symfony/yaml": "^3.3||^4.0"
   }
 }
