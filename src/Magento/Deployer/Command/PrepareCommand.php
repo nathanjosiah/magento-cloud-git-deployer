@@ -54,6 +54,7 @@ class PrepareCommand extends Command
                 return 100;
             }
         } else {
+            $path = getcwd();
             $output->writeln('<fg=blue>No path provided. Using working directory <fg=yellow>' . $path);
         }
 
