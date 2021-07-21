@@ -5,7 +5,7 @@ namespace Magento\Deployer\Model;
 use Symfony\Component\Yaml\Yaml;
 
 class Prepare {
-    public function execute(string $path, array $exclude, bool $laminasFix = false): void
+    public function execute(string $path, array $exclude, bool $laminasFix = false, string $eceVersion = 'dev-develop'): void
     {
         $excludedDirs = ['cloud_tmp', '.git', 'auth.json', 'app', '.magento.env.yaml', '.', '..'];
         $colorRed = "\e[0;31m";
@@ -32,8 +32,8 @@ class Prepare {
         }
         $composer2 = (int)$matches['version'] === 2;
 
-        //$deps = ['magento/ece-tools' => '=2002.1.2'];
-        $deps = ['magento/ece-tools' => 'dev-develop'];
+        echo "$colorBlue Using ece-tools $colorYellow ${eceVersion}$colorClear" . \PHP_EOL;
+        $deps = ['magento/ece-tools' => $eceVersion];
 
         $vendors = @scandir('app/code');
 

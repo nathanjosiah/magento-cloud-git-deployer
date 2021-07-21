@@ -32,6 +32,13 @@ class PrepareCommand extends Command
             InputOption::VALUE_NONE,
             'Exclude additional paths from being deleted'
         );
+        $this->addOption(
+            'ece-version',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'Specify the package version of ece-tools to use.',
+            'dev-develop'
+        );
         $this->addArgument(
             'directory',
             InputArgument::OPTIONAL,
@@ -59,7 +66,7 @@ class PrepareCommand extends Command
         }
 
         $prepare = new \Magento\Deployer\Model\Prepare();
-        $prepare->execute($path, $input->getOption('exclude'), $input->getOption('laminas-fix'));
+        $prepare->execute($path, $input->getOption('exclude'), $input->getOption('laminas-fix'), $input->getOption('ece-version'));
 
         return 0;
     }
