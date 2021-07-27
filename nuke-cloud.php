@@ -4,7 +4,7 @@
  */
 require_once __DIR__ . '/bootstrap.php';
 
-$opts = getopt('', ['exclude:','laminas-fix','ece-version:'], $firstPositionalArgIndex);
+$opts = getopt('', ['exclude:','laminas-fix','ece-version:', 'cloud-branch:'], $firstPositionalArgIndex);
 $path = getcwd();
 $excludedDirs = ['cloud_tmp', '.git', 'auth.json', 'app', '.magento.env.yaml', '.', '..'];
 $colorRed = "\e[0;31m";
@@ -26,4 +26,10 @@ if (!empty($argv[$firstPositionalArgIndex])) {
 }
 
 $prepare = new \Magento\Deployer\Model\Prepare();
-$prepare->execute($path, (array)@$opts['exclude'], isset($opts['laminas-fix']), $opts['ece-version'] ?? 'dev-develop');
+$prepare->execute(
+    $path,
+    (array)@$opts['exclude'],
+    isset($opts['laminas-fix']),
+    $opts['ece-version'] ?? 'dev-develop',
+    $opts['cloud-branch'] ?? 'master'
+);

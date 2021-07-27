@@ -5,8 +5,13 @@ namespace Magento\Deployer\Model;
 use Symfony\Component\Yaml\Yaml;
 
 class Prepare {
-    public function execute(string $path, array $exclude, bool $laminasFix = false, string $eceVersion = 'dev-develop'): void
-    {
+    public function execute(
+        string $path,
+        array $exclude,
+        bool $laminasFix = false,
+        string $eceVersion = 'dev-develop',
+        string $cloudBranch = 'master'
+    ): void {
         $excludedDirs = ['cloud_tmp', '.git', 'auth.json', 'app', '.magento.env.yaml', '.', '..'];
         $colorRed = "\e[0;31m";
         $colorBlue = "\e[0;34m";
@@ -80,8 +85,8 @@ class Prepare {
                 exit;
             }
         }
-        echo "$colorBlue Cloning cloud repo.$colorClear" . \PHP_EOL;
-        $result = `git clone --depth 1 --branch master git@github.com:magento/magento-cloud.git cloud_tmp 2>&1`;
+        echo "$colorBlue Cloning cloud repo with branch $colorYellow$cloudBranch$colorClear" . \PHP_EOL;
+        $result = `git clone --depth 1 --branch '$cloudBranch' git@github.com:magento/magento-cloud.git cloud_tmp 2>&1`;
 
         if (strpos($result, 'fatal:') !== false) {
             echo "$colorRed Could not clone cloud repo!$colorClear" . \PHP_EOL;

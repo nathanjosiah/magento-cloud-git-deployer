@@ -39,6 +39,13 @@ class PrepareCommand extends Command
             'Specify the package version of ece-tools to use.',
             'dev-develop'
         );
+        $this->addOption(
+            'cloud-branch',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'Specify the branch of magento-cloud to clone as a base.',
+            'master'
+        );
         $this->addArgument(
             'directory',
             InputArgument::OPTIONAL,
@@ -66,7 +73,13 @@ class PrepareCommand extends Command
         }
 
         $prepare = new \Magento\Deployer\Model\Prepare();
-        $prepare->execute($path, $input->getOption('exclude'), $input->getOption('laminas-fix'), $input->getOption('ece-version'));
+        $prepare->execute(
+            $path,
+            $input->getOption('exclude'),
+            $input->getOption('laminas-fix'),
+            $input->getOption('ece-version'),
+            $input->getOption('cloud-branch')
+        );
 
         return 0;
     }
