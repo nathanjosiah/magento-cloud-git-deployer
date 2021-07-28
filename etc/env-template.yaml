@@ -1,0 +1,19 @@
+stage:
+  global:
+    VERBOSE_COMMANDS: '-vv'
+    DEPLOYED_MAGENTO_VERSION_FROM_GIT: '2.4.4'
+    DEPLOY_FROM_GIT_OPTIONS:
+      clear_magento_module_requirements: true
+      repositories:
+        ce:
+          branch: 2.4.4-develop
+          repo: https://{TOKEN}@github.com/magento-commerce/magento2ce.git
+        ee:
+          branch: 2.4.4-develop
+          repo: https://{TOKEN}@github.com/magento-commerce/magento2ee.git
+        b2b:
+          branch: pre-release
+          repo: https://{TOKEN}@github.com/magento-commerce/magento2b2b.git
+        security:
+          branch: develop
+          repo: https://{TOKEN}@github.com/magento-commerce/security-package.git

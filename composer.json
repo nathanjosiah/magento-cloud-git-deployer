@@ -13,6 +13,8 @@
   ],
   "require": {
     "symfony/console": "^5.0",
-    "symfony/yaml": "^3.3||^4.0"
+    "symfony/yaml": "^3.3||^4.0",
+    "ext-json": "*",
+    "laminas/laminas-di": "^3.2"
   }
 }

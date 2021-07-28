@@ -8,6 +8,12 @@ declare(strict_types=1);
 
 namespace Magento\Deployer\Command;
 
+use Magento\Deployer\Model\Config\ComposerResolver;
+use Magento\Deployer\Model\Config\PathResolver;
+use Magento\Deployer\Model\Config\PrepareConfig;
+use Magento\Deployer\Model\ObjectManager\Factory;
+use Magento\Deployer\Model\Prepare;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,6 +23,48 @@ use Symfony\Component\Console\Output\OutputInterface;
 class PrepareCommand extends Command
 {
     protected static $defaultName = 'environment:prepare';
+    /**
+     * @var Factory
+     */
+    private $prepareConfigFactory;
+    /**
+     * @var Prepare
+     */
+    private $prepare;
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+    /**
+     * @var PathResolver
+     */
+    private $pathResolver;
+    /**
+     * @var ComposerResolver
+     */
+    private $composerResolver;
+
+    /**
+     * @param Factory $prepareConfigFactory
+     * @param Prepare $prepare
+     * @param LoggerInterface $logger
+     * @param PathResolver $pathResolver
+     * @param ComposerResolver $composerResolver
+     */
+    public function __construct(
+        Factory $prepareConfigFactory,
+        Prepare $prepare,
+        LoggerInterface $logger,
+        PathResolver $pathResolver,
+        ComposerResolver $composerResolver
+    ) {
+        parent::__construct();
+        $this->prepareConfigFactory = $prepareConfigFactory;
+        $this->prepare = $prepare;
+        $this->logger = $logger;
+        $this->pathResolver = $pathResolver;
+        $this->composerResolver = $composerResolver;
+    }
 
     protected function configure()
     {
@@ -55,31 +103,18 @@ class PrepareCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->setVerbosity(OutputInterface::VERBOSITY_VERBOSE);
+        $path = $this->pathResolver->resolveExistingProjectWithUserInput($input->getArgument('directory'));
 
-        $path = $input->getArgument('directory');
-        if (!empty($path)) {
-            $output->writeln('<fg=blue>Running in <fg=yellow>' . $path);
-            $path = realpath($path);
-            if ($path) {
-                $output->writeln('<fg=blue>Resolved to <fg=yellow>' . $path);
-            } else {
-                $output->writeln('<fg=red>Could not resolve given path!');
-                return 100;
-            }
-        } else {
-            $path = getcwd();
-            $output->writeln('<fg=blue>No path provided. Using working directory <fg=yellow>' . $path);
-        }
+        /** @var PrepareConfig $config */
+        $config = $this->prepareConfigFactory->create();
+        $config->setPath($path);
+        $config->setExclude($input->getOption('exclude'));
+        $config->setIsLaminasFix($input->getOption('laminas-fix'));
+        $config->setEceVersion($input->getOption('ece-version'));
+        $config->setCloudBranch($input->getOption('cloud-branch'));
+        $config->setIsComposer2((int)$this->composerResolver->resolve() === 2);
 
-        $prepare = new \Magento\Deployer\Model\Prepare();
-        $prepare->execute(
-            $path,
-            $input->getOption('exclude'),
-            $input->getOption('laminas-fix'),
-            $input->getOption('ece-version'),
-            $input->getOption('cloud-branch')
-        );
+        $this->prepare->execute($config);
 
         return 0;
     }

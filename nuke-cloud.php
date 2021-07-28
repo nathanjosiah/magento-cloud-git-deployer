@@ -2,34 +2,31 @@
 /**
  * @deprecated Please use `bin/deploy.php environment:prepare` CLI interface instead
  */
+
+use Magento\Deployer\Model\Config\ComposerResolver;
+use Magento\Deployer\Model\Config\PathResolver;
+use Magento\Deployer\Model\Config\PrepareConfig;
+use Magento\Deployer\Model\ObjectManager;
+use Magento\Deployer\Model\Prepare;
+use Symfony\Component\Console\Logger\ConsoleLogger;
+
 require_once __DIR__ . '/bootstrap.php';
 
+$objectManager = ObjectManager::getInstance();
+/** @var PathResolver $pathResolver */
+$pathResolver = $objectManager->get(PathResolver::class);
+$composerResolver = $objectManager->get(ComposerResolver::class);
+$prepare = $objectManager->get(Prepare::class);
+/** @var PrepareConfig $config */
+$config = $objectManager->create(PrepareConfig::class);
+$logger = $objectManager->get(ConsoleLogger::class);
+
+$logger->warning('<fg=red>nuke-cloud.php is deprecated. Please use `bin/deploy.php environment:prepare` CLI command instead.');
 $opts = getopt('', ['exclude:','laminas-fix','ece-version:', 'cloud-branch:'], $firstPositionalArgIndex);
-$path = getcwd();
-$excludedDirs = ['cloud_tmp', '.git', 'auth.json', 'app', '.magento.env.yaml', '.', '..'];
-$colorRed = "\e[0;31m";
-$colorBlue = "\e[0;34m";
-$colorYellow = "\e[1;33m";
-$colorClear = "\e[0m";
-
-if (!empty($argv[$firstPositionalArgIndex])) {
-    echo "$colorBlue Running in $colorYellow ${argv[$firstPositionalArgIndex]}$colorClear" . \PHP_EOL;
-    $path = realpath($argv[$firstPositionalArgIndex]);
-    if ($path) {
-        echo "$colorBlue Resolved to $colorYellow $path $colorClear" . \PHP_EOL;
-    } else {
-        echo "$colorRed Could not resolve given path!$colorClear" . \PHP_EOL;
-        exit;
-    }
-} else {
-    echo "$colorBlue No path provided. Using working directory $colorYellow $path $colorClear" . \PHP_EOL;
-}
-
-$prepare = new \Magento\Deployer\Model\Prepare();
-$prepare->execute(
-    $path,
-    (array)@$opts['exclude'],
-    isset($opts['laminas-fix']),
-    $opts['ece-version'] ?? 'dev-develop',
-    $opts['cloud-branch'] ?? 'master'
-);
+$config->setPath($pathResolver->resolveExistingProjectWithUserInput($argv[$firstPositionalArgIndex] ?? null));
+$config->setExclude((array)@$opts['exclude']);
+$config->setIsLaminasFix(isset($opts['laminas-fix']));
+$config->setEceVersion($opts['ece-version'] ?? 'dev-develop');
+$config->setCloudBranch($opts['cloud-branch'] ?? 'master');
+$config->setIsComposer2((int)$composerResolver->resolve() === 2);
+$prepare->execute($config);

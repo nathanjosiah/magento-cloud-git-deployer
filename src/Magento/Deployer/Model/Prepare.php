@@ -2,110 +2,79 @@
 
 namespace Magento\Deployer\Model;
 
+use Magento\Deployer\Model\Config\PrepareConfig;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Yaml\Yaml;
 
 class Prepare {
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+    /**
+     * @var ShellExecutor
+     */
+    private $shellExecutor;
+    /**
+     * @var CloudCloner
+     */
+    private $cloudCloner;
+
+    /**
+     * @param LoggerInterface $logger
+     * @param ShellExecutor $shellExecutor
+     * @param CloudCloner $cloudCloner
+     */
+    public function __construct(LoggerInterface $logger, ShellExecutor $shellExecutor, CloudCloner $cloudCloner)
+    {
+        $this->logger = $logger;
+        $this->shellExecutor = $shellExecutor;
+        $this->cloudCloner = $cloudCloner;
+    }
+
     public function execute(
-        string $path,
-        array $exclude,
-        bool $laminasFix = false,
-        string $eceVersion = 'dev-develop',
-        string $cloudBranch = 'master'
+        PrepareConfig $config
     ): void {
         $excludedDirs = ['cloud_tmp', '.git', 'auth.json', 'app', '.magento.env.yaml', '.', '..'];
-        $colorRed = "\e[0;31m";
-        $colorBlue = "\e[0;34m";
-        $colorGreen = "\e[0;32m";
-        $colorYellow = "\e[1;33m";
-        $colorClear = "\e[0m";
 
-        chdir($path);
-
-        if (!is_writable($path)) {
-            echo "$colorRed Directory is not writable!$colorClear" . \PHP_EOL;
+        if (!is_writable($config->getPath())) {
+            $this->logger->error('Directory is not writable!');
             exit;
         }
 
-        echo "$colorBlue Getting composer version" . \PHP_EOL;
-        if (preg_match('/version (?P<version>.*?) /', `composer --version 2>&1`, $matches)) {
-            if (empty($matches['version'])) {
-                echo "$colorRed Could not find composer!$colorClear" . \PHP_EOL;
-                exit;
-            } else {
-                echo "$colorBlue Found composer version $colorYellow ${matches['version']}$colorClear" . \PHP_EOL;
-            }
-        }
-        $composer2 = (int)$matches['version'] === 2;
+        chdir($config->getPath());
 
-        echo "$colorBlue Using ece-tools $colorYellow ${eceVersion}$colorClear" . \PHP_EOL;
-        $deps = ['magento/ece-tools' => $eceVersion];
+        $this->logger->info('<fg=blue>Using ece-tools <fg=yellow>' . $config->getEceVersion());
+        $deps = ['magento/ece-tools' => $config->getEceVersion()];
 
-        $vendors = @scandir('app/code');
-
-        //if (is_dir('app/code')) {
-        //    $files = glob('app/code/*/*/composer.json');
-        //    foreach ($files as $file) {
-        //        $composer = json_decode(file_get_contents($file), true);
-        //        if (!empty($composer['require'])) {
-        //            foreach($composer['require'] as $dep => $version) {
-        //                if (strpos($dep, 'magento/') !== 0 && $dep !== 'php') {
-        //                    $deps[$dep] = $version;
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
-        if (!empty($exclude)) {
-
+        if (!empty($config->getExclude())) {
             $error = false;
-            foreach ($exclude as $excludePath) {
+            foreach ($config->getExclude() as $excludePath) {
                 $excludeRealPath = realpath($excludePath);
                 if (!$excludeRealPath || !file_exists($excludeRealPath)) {
-                    echo "$colorRed Excluded path $colorYellow $excludePath $colorBlue does not exist $colorClear." . \PHP_EOL;
+                    $this->logger->error("Excluded path $excludePath does not exist");
                     $error = true;
                 } else {
-                    if (strpos($excludeRealPath, $path) !== 0) {
-                        echo "$colorRed Exclude path isn't in project directory. $colorClear" . \PHP_EOL;
+                    if (strpos($excludeRealPath, $config->getPath()) !== 0) {
+                        $this->logger->error("Exclude path $excludeRealPath isn't in project directory.");
                         $error = true;
                     } else {
-                        $excludedDirs[] = substr($excludeRealPath, strlen($path) + 1);
+                        $excludedDirs[] = substr($excludeRealPath, strlen($config->getPath()) + 1);
                     }
                 }
             }
             if ($error) {
-                return;
-            }
-        }
-
-        if (file_exists($path . '/cloud_tmp')) {
-            echo "$colorBlue Found existing cloud_tmp folder. Deleting.$colorClear" . \PHP_EOL;
-            if(system('rm -rf ' . escapeshellarg($path . '/cloud_tmp'))) {
-                echo "$colorRed Could not delete tmp folder!$colorClear" . \PHP_EOL;
                 exit;
             }
         }
-        echo "$colorBlue Cloning cloud repo with branch $colorYellow$cloudBranch$colorClear" . \PHP_EOL;
-        $result = `git clone --depth 1 --branch '$cloudBranch' git@github.com:magento/magento-cloud.git cloud_tmp 2>&1`;
-
-        if (strpos($result, 'fatal:') !== false) {
-            echo "$colorRed Could not clone cloud repo!$colorClear" . \PHP_EOL;
-            exit;
-        }
-
-        register_shutdown_function(function() use ($path, $colorRed, $colorClear) {
-            if(system('rm -rf ' . escapeshellarg($path . '/cloud_tmp'))) {
-                echo "$colorRed Could not delete tmp folder!$colorClear" . \PHP_EOL;
-                exit;
-            }
-        });
 
         $keep = implode('" -not -name "' , $excludedDirs);
-        echo "$colorBlue Purging folder of all but minimum files. $colorClear" . \PHP_EOL;
-        `find . -maxdepth 1 -not -name "$keep" -exec rm -rf {} +`;
-        echo "$colorBlue Transferring mainline files. $colorClear" . \PHP_EOL;
-        `rsync -av cloud_tmp/ . --exclude=.git --exclude=.github`;
-        echo "$colorBlue Adjusting composer.json. $colorClear" . \PHP_EOL;
+        $this->logger->info('<fg=blue>Purging folder of all but minimum files.');
+        $this->shellExecutor->execute('find . -maxdepth 1 -not -name "' . $keep . '" -exec rm -rf {} +');
+
+        $this->cloudCloner->cloneToCwd($config->getCloudBranch(), false);
+
+        $this->logger->info('<fg=blue>Adjusting composer.json.');
         $composer = json_decode(file_get_contents('composer.json'), true);
         $composer['repositories'] = [
             'ece-tools' => [
@@ -135,42 +104,42 @@ class Prepare {
             'magento/magento-cloud-components' => '*'
         ];
 
-        if ($laminasFix) {
+        if ($config->isLaminasFix()) {
             $composer['require']['laminas/laminas-escaper'] = '2.7.0';
         }
 
-        if ($composer2) {
-            echo "$colorBlue Configuring for composer 2. $colorClear" . \PHP_EOL;
-            $appYaml = Yaml::parseFile($path . '/.magento.app.yaml');
+        if ($config->isComposer2()) {
+            $this->logger->info('<fg=blue>Configuring for composer 2.');
+            $appYaml = Yaml::parseFile($config->getPath() . '/.magento.app.yaml');
             $appYaml['build']['flavor'] = 'none';
             $appYaml['dependencies']['php']['composer/composer'] = '^2.0';
             $appYaml['hooks']['build'] = 'set -e' . "\n"
             . 'composer --no-ansi --no-interaction install --no-progress --prefer-dist --optimize-autoloader' . "\n"
             . $appYaml['hooks']['build'];
-            file_put_contents($path . '/.magento.app.yaml', Yaml::dump($appYaml));
-        }
-        else {
-            echo "$colorBlue Using composer 1. $colorClear" . \PHP_EOL;
+            file_put_contents($config->getPath() . '/.magento.app.yaml', Yaml::dump($appYaml));
+        } else {
+            $this->logger->info('<fg=blue>Using composer 1.');
         }
 
         file_put_contents('composer.json', json_encode($composer, JSON_PRETTY_PRINT));
 
-        echo "$colorBlue Running composer update $colorClear." . \PHP_EOL;
-        `composer update --ansi --no-interaction`;
+        $this->logger->info('<fg=blue>Running composer update');
+        $this->shellExecutor->execute('composer update --ansi --no-interaction');
         $composerPretty = json_encode($composer, JSON_PRETTY_PRINT);
         $composerCopyPath = realpath('.') . '/original-composer.json';
-        echo "$colorBlue Saving copy of composer.json before dev:git:update-composer to $colorYellow $composerCopyPath $colorClear" . \PHP_EOL;
+        $this->logger->info('<fg=blue>Saving copy of composer.json before dev:git:update-composer to <fg=yellow>' . $composerCopyPath);
         file_put_contents($composerCopyPath, $composerPretty);
-        echo "$colorBlue Running $colorYellow php vendor/bin/ece-tools dev:git:update-composer $colorClear" . \PHP_EOL;
+        $this->logger->info('<fg=blue>Running <fg=yellow>php vendor/bin/ece-tools dev:git:update-composer');
         $bin = PHP_BINARY;
-        `{$bin} vendor/bin/ece-tools dev:git:update-composer`;
-        echo "$colorBlue Fixing composer autoloader settings $colorClear." . \PHP_EOL;
+        $this->shellExecutor->execute($bin . ' vendor/bin/ece-tools dev:git:update-composer');
+        $this->logger->info('<fg=blue>Fixing composer autoloader settings');
         $mainlineComposer = json_decode(file_get_contents('cloud_tmp/composer.json'), true);
         $localComposer = json_decode(file_get_contents('composer.json'), true);
         $localComposer['autoload'] = $mainlineComposer['autoload'];
         $localComposerPretty = json_encode($localComposer, JSON_PRETTY_PRINT);
-        echo "$colorBlue composer.json after dev:git:update-composer saved to composer.json$colorClear" . \PHP_EOL;
+        $this->logger->info('<fg=blue>composer.json after dev:git:update-composer saved to composer.json');
         file_put_contents('composer.json', $localComposerPretty);
-        echo "$colorGreen Complete! $colorClear" . \PHP_EOL;
+        $this->cloudCloner->cleanup();
+        $this->logger->info('<fg=green>Complete!');
     }
 }

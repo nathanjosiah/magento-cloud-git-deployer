@@ -1,9 +1,10 @@
 <?php
-use Symfony\Component\Console\Application;
-use Magento\Deployer\Command\PrepareCommand;
+
+use Magento\Deployer\Model\ApplicationFactory;
 
 require_once __DIR__ . '/../bootstrap.php';
 
-$application = new Application();
-$application->add(new PrepareCommand());
-$application->run();
+$objectManager = \Magento\Deployer\Model\ObjectManager::getInstance();
+/** @var ApplicationFactory $applicationFactory */
+$applicationFactory = $objectManager->get(ApplicationFactory::class);
+$applicationFactory->create()->run();
