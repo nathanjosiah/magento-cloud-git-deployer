@@ -100,6 +100,8 @@ class Prepare {
         ];
         unset($composer['autoload']);
         $composer['require'] = $deps;
+        $composer['require']['magento/magento-cloud-patches'] = 'dev-develop as 1.0.11';
+        $composer['require']['magento/quality-patches'] = 'dev-master as 1.1.0';
         $composer['replace'] = [
             'magento/magento-cloud-components' => '*'
         ];
@@ -129,9 +131,8 @@ class Prepare {
         $composerCopyPath = realpath('.') . '/original-composer.json';
         $this->logger->info('<fg=blue>Saving copy of composer.json before dev:git:update-composer to <fg=yellow>' . $composerCopyPath);
         file_put_contents($composerCopyPath, $composerPretty);
-        $this->logger->info('<fg=blue>Running <fg=yellow>php vendor/bin/ece-tools dev:git:update-composer');
-        $bin = PHP_BINARY;
-        $this->shellExecutor->execute($bin . ' vendor/bin/ece-tools dev:git:update-composer');
+        $this->logger->info('<fg=blue>Running <fg=yellow>dev:git:update-composer');
+        $this->shellExecutor->execute('vendor/bin/ece-tools dev:git:update-composer');
         $this->logger->info('<fg=blue>Fixing composer autoloader settings');
         $mainlineComposer = json_decode(file_get_contents('cloud_tmp/composer.json'), true);
         $localComposer = json_decode(file_get_contents('composer.json'), true);
