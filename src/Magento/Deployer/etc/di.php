@@ -29,6 +29,12 @@ return [
             'parameters' => [
                 'prepareConfigFactory' => new FactoryProxy(\Magento\Deployer\Model\Config\PrepareConfig::class)
             ]
+        ],
+        \Symfony\Component\Console\Application::class => [
+            'parameters' => [
+                'name' => 'Magento Cloud Git Deployer CLI',
+                'version' => 'dev'
+            ]
         ]
     ]
 ];

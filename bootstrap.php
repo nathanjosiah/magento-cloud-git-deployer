@@ -4,7 +4,11 @@ use Laminas\Di\Config;
 use Laminas\Di\Injector;
 use Magento\Deployer\Model\ObjectManager;
 
-require_once __DIR__ . '/vendor/autoload.php';
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require __DIR__ . '/vendor/autoload.php';
+} else {
+    require __DIR__ . '/../../autoload.php';
+}
 
 const BP = __DIR__;
 $config = include __DIR__ . '/src/Magento/Deployer/etc/di.php';

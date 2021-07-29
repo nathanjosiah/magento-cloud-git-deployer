@@ -38,7 +38,7 @@ class ApplicationFactory
     public function create(): Application
     {
         /** @var Application $application */
-        $application = $this->objectManager->create(Application::class);
+        $application = $this->objectManager->get(Application::class);
         foreach ($this->commands as $command) {
             $application->add($command);
         }
