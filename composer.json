@@ -1,5 +1,5 @@
 {
-  "name": "magento/magento-cloud-git-deployer",
+  "name": "nathanjosiah/magento-cloud-git-deployer",
   "autoload": {
     "psr-4": {
       "Magento\\": "src/Magento/"
@@ -16,5 +16,8 @@
     "symfony/yaml": "^3.3||^4.0",
     "ext-json": "*",
     "laminas/laminas-di": "^3.2"
-  }
+  },
+  "bin": [
+    "cloud-deployer"
+  ]
 }
