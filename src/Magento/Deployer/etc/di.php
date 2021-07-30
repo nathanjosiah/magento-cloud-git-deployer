@@ -4,7 +4,6 @@ declare(strict_types=1);
 use Magento\Deployer\Model\ObjectManager\FactoryProxy;
 use Magento\Deployer\Model\ObjectManager\ObjectArrayResolver;
 
-// Should eventually be converted to xml
 return [
     'preferences' => [
         \Psr\Log\LoggerInterface::class => \Symfony\Component\Console\Logger\ConsoleLogger::class,
@@ -20,6 +19,7 @@ return [
         \Magento\Deployer\Model\ApplicationFactory::class => [
             'parameters' => [
                 'commands' => new ObjectArrayResolver([
+                    'self-update' => \Magento\Deployer\Command\SelfUpdate::class,
                     'init' => \Magento\Deployer\Command\InitCommand::class,
                     'prepare' => \Magento\Deployer\Command\PrepareCommand::class
                 ])

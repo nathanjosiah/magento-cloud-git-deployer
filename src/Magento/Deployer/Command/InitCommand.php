@@ -9,11 +9,7 @@ declare(strict_types=1);
 namespace Magento\Deployer\Command;
 
 use Magento\Deployer\Model\CloudCloner;
-use Magento\Deployer\Model\Config\ComposerResolver;
 use Magento\Deployer\Model\Config\PathResolver;
-use Magento\Deployer\Model\Config\PrepareConfig;
-use Magento\Deployer\Model\ObjectManager\Factory;
-use Magento\Deployer\Model\Prepare;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

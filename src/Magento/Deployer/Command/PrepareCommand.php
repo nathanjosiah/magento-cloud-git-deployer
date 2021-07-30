@@ -23,6 +23,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class PrepareCommand extends Command
 {
     protected static $defaultName = 'environment:prepare';
+    protected static $defaultDescription = 'Prepare a git-based cloud project for deployment.';
+
     /**
      * @var Factory
      */
