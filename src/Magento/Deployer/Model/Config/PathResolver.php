@@ -13,10 +13,7 @@ use Psr\Log\LoggerInterface;
 
 class PathResolver
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
      * @param LoggerInterface $logger
@@ -38,7 +35,7 @@ class PathResolver
                 exit;
             }
         } else {
-            $path = getcwd();
+            $path = realpath(getcwd());
             $this->logger->info('<fg=blue>No path provided. Using working directory <fg=yellow>' . $path);
         }
 

@@ -13,7 +13,6 @@ use Magento\Deployer\Model\Config\PathResolver;
 use Magento\Deployer\Model\Config\PrepareConfig;
 use Magento\Deployer\Model\ObjectManager\Factory;
 use Magento\Deployer\Model\Prepare;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,45 +24,29 @@ class PrepareCommand extends Command
     protected static $defaultName = 'environment:prepare';
     protected static $defaultDescription = 'Prepare a git-based cloud project for deployment.';
 
-    /**
-     * @var Factory
-     */
-    private $prepareConfigFactory;
-    /**
-     * @var Prepare
-     */
-    private $prepare;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var PathResolver
-     */
-    private $pathResolver;
+    private Factory $prepareConfigFactory;
+    private Prepare $prepare;
+    private PathResolver $pathResolver;
     /**
      * @var ComposerResolver
      */
-    private $composerResolver;
+    private ComposerResolver $composerResolver;
 
     /**
      * @param Factory $prepareConfigFactory
      * @param Prepare $prepare
-     * @param LoggerInterface $logger
      * @param PathResolver $pathResolver
      * @param ComposerResolver $composerResolver
      */
     public function __construct(
         Factory $prepareConfigFactory,
         Prepare $prepare,
-        LoggerInterface $logger,
         PathResolver $pathResolver,
         ComposerResolver $composerResolver
     ) {
         parent::__construct();
         $this->prepareConfigFactory = $prepareConfigFactory;
         $this->prepare = $prepare;
-        $this->logger = $logger;
         $this->pathResolver = $pathResolver;
         $this->composerResolver = $composerResolver;
     }

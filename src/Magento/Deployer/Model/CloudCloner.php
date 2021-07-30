@@ -13,14 +13,8 @@ use Psr\Log\LoggerInterface;
 
 class CloudCloner
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var ShellExecutor
-     */
-    private $shellExecutor;
+    private LoggerInterface $logger;
+    private ShellExecutor $shellExecutor;
 
     /**
      * @param LoggerInterface $logger

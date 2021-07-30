@@ -17,3 +17,10 @@ stage:
         security:
           branch: develop
           repo: https://{TOKEN}@github.com/magento-commerce/security-package.git
+        adobe-stock-integration:
+          branch: develop
+          repo: https://{TOKEN}@github.com:magento-cia/adobe-stock-integration.git
+        fastly:
+          branch: master
+          repo: https://github.com/fastly/fastly-magento2.git
+          type: single-package

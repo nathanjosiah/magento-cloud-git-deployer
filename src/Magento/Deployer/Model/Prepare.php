@@ -7,29 +7,27 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Yaml\Yaml;
 
 class Prepare {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var ShellExecutor
-     */
-    private $shellExecutor;
-    /**
-     * @var CloudCloner
-     */
-    private $cloudCloner;
+    private LoggerInterface $logger;
+    private ShellExecutor $shellExecutor;
+    private CloudCloner $cloudCloner;
+    private FilePurger $filePurger;
 
     /**
      * @param LoggerInterface $logger
      * @param ShellExecutor $shellExecutor
      * @param CloudCloner $cloudCloner
+     * @param FilePurger $filePurger
      */
-    public function __construct(LoggerInterface $logger, ShellExecutor $shellExecutor, CloudCloner $cloudCloner)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        ShellExecutor $shellExecutor,
+        CloudCloner $cloudCloner,
+        FilePurger $filePurger
+    ) {
         $this->logger = $logger;
         $this->shellExecutor = $shellExecutor;
         $this->cloudCloner = $cloudCloner;
+        $this->filePurger = $filePurger;
     }
 
     public function execute(
@@ -68,9 +66,8 @@ class Prepare {
             }
         }
 
-        $keep = implode('" -not -name "' , $excludedDirs);
-        $this->logger->info('<fg=blue>Purging folder of all but minimum files.');
-        $this->shellExecutor->execute('find . -maxdepth 1 -not -name "' . $keep . '" -exec rm -rf {} +');
+
+        $this->filePurger->purgePathWithExceptions($config->getPath(), $excludedDirs);
 
         $this->cloudCloner->cloneToCwd($config->getCloudBranch(), false);
 

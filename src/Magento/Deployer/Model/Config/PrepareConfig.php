@@ -10,30 +10,15 @@ namespace Magento\Deployer\Model\Config;
 
 class PrepareConfig
 {
-    /**
-     * @var string
-     */
-    private $path;
+    private string $path;
 
-    /**
-     * @var array
-     */
-    private $exclude;
+    private array $exclude;
 
-    /**
-     * @var bool
-     */
-    private $laminasFix;
+    private bool $laminasFix;
 
-    /**
-     * @var string
-     */
-    private $eceVersion;
+    private string $eceVersion;
 
-    /**
-     * @var string
-     */
-    private $cloudBranch;
+    private string $cloudBranch;
 
     /**
      * @return bool

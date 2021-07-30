@@ -9,19 +9,12 @@ declare(strict_types=1);
 namespace Magento\Deployer\Model;
 
 
-use Magento\Deployer\Model\ObjectManager;
 use Symfony\Component\Console\Application;
 
 class ApplicationFactory
 {
-    /**
-     * @var ObjectManager
-     */
-    private $objectManager;
-    /**
-     * @var array
-     */
-    private $commands;
+    private ObjectManager $objectManager;
+    private array $commands;
 
     /**
      * @param ObjectManager $objectManager

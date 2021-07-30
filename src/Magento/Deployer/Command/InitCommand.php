@@ -21,18 +21,9 @@ use Symfony\Component\Console\Question\Question;
 class InitCommand extends Command
 {
     protected static $defaultName = 'project:init';
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var PathResolver
-     */
-    private $pathResolver;
-    /**
-     * @var CloudCloner
-     */
-    private $cloudCloner;
+    private LoggerInterface $logger;
+    private PathResolver $pathResolver;
+    private CloudCloner $cloudCloner;
 
     /**
      * @param LoggerInterface $logger

@@ -12,9 +12,6 @@ use Laminas\Di\Resolver\ValueInjection;
 use Magento\Deployer\Model\ObjectManager;
 use Psr\Container\ContainerInterface;
 
-/**
- *
- */
 class ObjectArrayResolver extends ValueInjection
 {
     public function toValue(ContainerInterface $container)

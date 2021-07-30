@@ -13,20 +13,11 @@ use Psr\Container\ContainerInterface;
 
 class ObjectManager implements ContainerInterface
 {
-    /**
-     * @var array
-     */
-    private $cache;
+    private array $cache;
 
-    /**
-     * @var self
-     */
-    static $instance;
+    static ObjectManager $instance;
 
-    /**
-     * @var InjectorInterface
-     */
-    private $injector;
+    private InjectorInterface $injector;
 
     /**
      * @param InjectorInterface $injector

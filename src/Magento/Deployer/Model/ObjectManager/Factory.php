@@ -11,19 +11,10 @@ namespace Magento\Deployer\Model\ObjectManager;
 
 use Magento\Deployer\Model\ObjectManager;
 
-/**
- *
- */
 class Factory
 {
-    /**
-     * @var ObjectManager
-     */
-    private $objectManager;
-    /**
-     * @var string
-     */
-    private $class;
+    private ObjectManager $objectManager;
+    private string $class;
 
     /**
      * @param ObjectManager $objectManager

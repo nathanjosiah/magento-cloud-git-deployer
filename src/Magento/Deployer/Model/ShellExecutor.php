@@ -13,10 +13,7 @@ use Psr\Log\LoggerInterface;
 
 class ShellExecutor
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
      * @param LoggerInterface $logger
