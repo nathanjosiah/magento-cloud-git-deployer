@@ -3,7 +3,7 @@ Magento Cloud Git Deployer
 
 Because deploying git to cloud is hard
 
-Even when it works, the [git-based deployment process](https://wiki.corp.magento.com/x/KbbrBw) is long and messy. Git deployments do not get the same attention that composer deployments do even though this is the primary workflow of all internal core development. Sure there is the [VCS installer tool](https://github.com/magento-commerce/magento-vcs-installer) but it is not maintained and is also complicated to use plus is just as inconsistent.
+Even when it works, the [git-based deployment process](https://wiki.corp.magento.com/x/KbbrBw) is long and messy. Git deployments do not get the same attention that composer deployments do even though this is the primary workflow of all internal core development. There is the [VCS installer tool](https://github.com/magento-commerce/magento-vcs-installer) but it is not maintained as a first-class citizen project and just as inconsistent. It is also not built or maintained by people using it.
 
 That's where the Magento Cloud Git Deployer comes to the rescue.
 
@@ -19,12 +19,15 @@ Then it will then run `composer update` as well as `ece-tools dev:git:update-com
 
 With this tool, preparing for a deployment is always a single step. And aside from the issues presented in the intro description, when you want to switch branches on your instance you often have to start from scratch because `ece-tools` is buggy with this workflow. 
 
-# Installation:
+# Installation
 
 1. Add the repo to global composer `composer global config repositories.deployer vcs git@github.com:nathanjosiah/magento-cloud-git-deployer.git`
 1. Enable dev dependencies `composer global config minimum-stability dev`
 1. Install the tool `composer global require nathanjosiah/magento-cloud-git-deployer`
 1. Verify your installation with `cloud-deployer --version`. You should see something like `Magento Cloud Git Deployer CLI dev`.
+
+# Update
+1. Run `cloud-deployer self-update`
 
 # Usage
 1. Ensure you have configured your `.magento.env.yaml` file with what you want to deploy.
@@ -34,7 +37,7 @@ With this tool, preparing for a deployment is always a single step. And aside fr
 
 ## To prepare for a deployment to a different branch
 
-1. Follow steps 3-5 again with the branches you want in your `.magento.env.yaml`.
+1. Update your `.magento.env.yaml` and run `cloud-deployer environment:prepare`.
 1. If you are switching between release-lines (e.g. 2.4.x -> 2.3.x) then you will probably have to remove the existing Magento data from your instance. 
    To do that, ssh into your cloud instance (via `magento-cloud ssh`) and run the following:
    ```
@@ -44,3 +47,4 @@ With this tool, preparing for a deployment is always a single step. And aside fr
    ```
    
    This is the fastest and cleanest method to fully remove the existing Magento installation. The `bin/magento setup:uninstall` command is slow and leaves a bunch of files behind. It also doesn't flush redis. 
+1. Commit and push all the files.
