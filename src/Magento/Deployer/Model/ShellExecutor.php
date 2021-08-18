@@ -26,6 +26,7 @@ class ShellExecutor
     public function execute($command): ?string
     {
         $this->logger->debug('Executing <fg=yellow>' . $command);
+
         return `$command`;
     }
 }

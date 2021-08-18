@@ -19,7 +19,7 @@ else
 fi
 
 # If we are in the global Composer "bin" directory, we need to bump our
-# current directory up two, so that we will correctly proxy into the CLI
+# current directory up, so that we will correctly proxy into the CLI
 if [ ! -f "$DIR/bin/deploy.php" ]
 then
     DIR=$(php -r "echo realpath('$DIR/../nathanjosiah/magento-cloud-git-deployer');")

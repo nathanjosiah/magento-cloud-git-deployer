@@ -97,8 +97,6 @@ class Prepare {
         ];
         unset($composer['autoload']);
         $composer['require'] = $deps;
-        $composer['require']['magento/magento-cloud-patches'] = 'dev-develop as 1.0.11';
-        $composer['require']['magento/quality-patches'] = 'dev-master as 1.1.0';
         $composer['replace'] = [
             'magento/magento-cloud-components' => '*'
         ];

@@ -18,7 +18,11 @@
     "ext-json": "*",
     "laminas/laminas-di": "^3.2"
   },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  },
   "bin": [
     "cloud-deployer"
   ]
 }
+ 
