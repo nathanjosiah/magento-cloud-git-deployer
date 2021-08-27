@@ -21,11 +21,12 @@ $prepare = $objectManager->get(Prepare::class);
 $config = $objectManager->create(PrepareConfig::class);
 $logger = $objectManager->get(ConsoleLogger::class);
 
+
 $logger->warning('<fg=red>nuke-cloud.php is deprecated. Please use `bin/deploy.php environment:prepare` CLI command instead.');
-$opts = getopt('', ['exclude:','laminas-fix','ece-version:', 'cloud-branch:'], $firstPositionalArgIndex);
+$opts = getopt('', ['exclude:','hotfix:','ece-version:', 'cloud-branch:'], $firstPositionalArgIndex);
 $config->setPath($pathResolver->resolveExistingProjectWithUserInput($argv[$firstPositionalArgIndex] ?? null));
 $config->setExclude((array)@$opts['exclude']);
-$config->setIsLaminasFix(isset($opts['laminas-fix']));
+$config->setHotfixes((array)@$opts['hotfix']);
 $config->setEceVersion($opts['ece-version'] ?? 'dev-develop');
 $config->setCloudBranch($opts['cloud-branch'] ?? 'master');
 $config->setIsComposer2((int)$composerResolver->resolve() === 2);

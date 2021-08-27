@@ -60,10 +60,10 @@ class PrepareCommand extends Command
             'Exclude additional paths from being deleted'
         );
         $this->addOption(
-            'laminas-fix',
+            'hotfix',
             null,
-            InputOption::VALUE_NONE,
-            'Exclude additional paths from being deleted'
+            InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+            'Array of hotfix names to be applied'
         );
         $this->addOption(
             'ece-version',
@@ -94,7 +94,7 @@ class PrepareCommand extends Command
         $config = $this->prepareConfigFactory->create();
         $config->setPath($path);
         $config->setExclude($input->getOption('exclude'));
-        $config->setIsLaminasFix($input->getOption('laminas-fix'));
+        $config->setHotfixes($input->getOption('hotfix'));
         $config->setEceVersion($input->getOption('ece-version'));
         $config->setCloudBranch($input->getOption('cloud-branch'));
         $config->setIsComposer2((int)$this->composerResolver->resolve() === 2);

@@ -14,7 +14,7 @@ class PrepareConfig
 
     private array $exclude;
 
-    private bool $laminasFix;
+    private array $hotfixes = [];
 
     private string $eceVersion;
 
@@ -74,19 +74,19 @@ class PrepareConfig
     }
 
     /**
-     * @return bool
+     * @return array
      */
-    public function isLaminasFix(): bool
+    public function getHotfixes(): array
     {
-        return $this->laminasFix;
+        return $this->hotfixes;
     }
 
     /**
-     * @param bool $laminasFix
+     * @param array $hotfixes
      */
-    public function setIsLaminasFix(bool $laminasFix): void
+    public function setHotfixes(array $hotfixes): void
     {
-        $this->laminasFix = $laminasFix;
+        $this->hotfixes = $hotfixes;
     }
 
     /**

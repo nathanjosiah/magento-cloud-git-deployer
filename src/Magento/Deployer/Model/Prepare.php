@@ -33,6 +33,12 @@ class Prepare {
     public function execute(
         PrepareConfig $config
     ): void {
+        $validHotfixes = ['monolog-and-es'];
+        if (array_diff($validHotfixes, $config->getHotfixes())) {
+            $this->logger->error('Invalid hotfix supplied, valid hotfixes are: "' . implode('", "', $validHotfixes) . '"');
+            exit;
+        }
+
         $excludedDirs = ['cloud_tmp', '.git', 'auth.json', 'app', '.magento.env.yaml', '.', '..'];
 
         if (!is_writable($config->getPath())) {
@@ -101,10 +107,6 @@ class Prepare {
             'magento/magento-cloud-components' => '*'
         ];
 
-        if ($config->isLaminasFix()) {
-            $composer['require']['laminas/laminas-escaper'] = '2.7.0';
-        }
-
         if ($config->isComposer2()) {
             $this->logger->info('<fg=blue>Configuring for composer 2.');
             $appYaml = Yaml::parseFile($config->getPath() . '/.magento.app.yaml');
@@ -128,6 +130,22 @@ class Prepare {
         file_put_contents($composerCopyPath, $composerPretty);
         $this->logger->info('<fg=blue>Running <fg=yellow>dev:git:update-composer');
         $this->shellExecutor->execute('vendor/bin/ece-tools dev:git:update-composer');
+
+        if (array_search('monolog-and-es', $config->getHotfixes())) {
+            $this->logger->info('<fg=blue>Applying monolog hotfix');
+            $composer['repositories']['magento-cloud-patches']['url'] = 'git@github.com:magento-cia/magento-cloud-components.git';
+            $composer['repositories']['magento-cloud-components']['url'] = 'git@github.com:magento/magento-cloud-components.git';
+            $composer['repositories']['ece-tools']['url'] = 'git@github.com:magento-cia/ece-tools.git';
+            $composer['require']['magento/ece-tools'] = 'dev-ACMP-1263-2';
+            $composer['require']['magento/magento-cloud-patches'] = 'dev-ACMP-1263 as 1.0.11';
+            $composer['require']['magento/magento-cloud-components'] = 'dev-ACMP-1263-2 as 1.0.8';
+            $composer['require']['elasticsearch/elasticsearch'] = 'v7.11.0';
+            $this->logger->info('<fg=blue>Overwriting composer.json with hotfix changes');
+            file_put_contents('composer.json', json_encode($composer, JSON_PRETTY_PRINT));
+            $this->logger->info('<fg=blue>Running composer update');
+            $this->shellExecutor->execute('composer update --ansi --no-interaction');
+        }
+
         $this->logger->info('<fg=blue>Fixing composer autoloader settings');
         $mainlineComposer = json_decode(file_get_contents('cloud_tmp/composer.json'), true);
         $localComposer = json_decode(file_get_contents('composer.json'), true);
