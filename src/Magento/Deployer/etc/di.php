@@ -9,6 +9,7 @@ return [
         \Psr\Log\LoggerInterface::class => \Symfony\Component\Console\Logger\ConsoleLogger::class,
         \Symfony\Component\Console\Input\InputInterface::class => \Symfony\Component\Console\Input\ArgvInput::class,
         \Symfony\Component\Console\Output\OutputInterface::class => \Symfony\Component\Console\Output\ConsoleOutput::class,
+        \Magento\Deployer\Model\PrepareStrategy\StrategyInterface::class => \Magento\Deployer\Model\PrepareStrategy\CompositeStrategy::class
     ],
     'types' => [
         \Magento\Deployer\Model\HotfixApplier::class => [
@@ -27,6 +28,23 @@ return [
                     'apply-hotfix' => \Magento\Deployer\Command\ApplyHotfix::class,
                     'list-hotfix' => \Magento\Deployer\Command\ListHotfixes::class
                 ])
+            ]
+        ],
+        \Magento\Deployer\Model\PrepareStrategy\TraditionalStrategy::class => [
+            'parameters' => [
+                'composerFactory' => new FactoryProxy(\Magento\Deployer\Model\Composer::class)
+            ]
+        ],
+        \Magento\Deployer\Model\PrepareStrategy\CompositeStrategy::class => [
+            'parameters' => [
+                'strategies' => new ObjectArrayResolver([
+                    'traditional' => \Magento\Deployer\Model\PrepareStrategy\TraditionalStrategy::class,
+                ])
+            ]
+        ],
+        \Magento\Deployer\Model\Hotfix\MonologAndEs::class => [
+            'parameters' => [
+                'composerFactory' => new FactoryProxy(\Magento\Deployer\Model\Composer::class)
             ]
         ],
         \Magento\Deployer\Model\FilePurger::class => [

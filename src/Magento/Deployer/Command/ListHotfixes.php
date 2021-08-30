@@ -22,7 +22,7 @@ class ListHotfixes extends Command
      * @param HotfixApplier $hotfixApplier
      */
     public function __construct(
-        HotfixApplier $hotfixApplier,
+        HotfixApplier $hotfixApplier
     ) {
         parent::__construct();
         $this->hotfixApplier = $hotfixApplier;

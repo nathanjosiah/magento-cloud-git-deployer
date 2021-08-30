@@ -13,7 +13,8 @@ use Magento\Deployer\Model\Config\PathResolver;
 use Magento\Deployer\Model\Config\PrepareConfig;
 use Magento\Deployer\Model\HotfixApplier;
 use Magento\Deployer\Model\ObjectManager\Factory;
-use Magento\Deployer\Model\Prepare;
+use Magento\Deployer\Model\PrepareStrategy\StrategyInterface;
+use Magento\Deployer\Model\TraditionalStrategy;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -26,7 +27,7 @@ class PrepareCommand extends Command
     protected static $defaultDescription = 'Prepare a git-based cloud project for deployment.';
 
     private Factory $prepareConfigFactory;
-    private Prepare $prepare;
+    private StrategyInterface $prepare;
     private PathResolver $pathResolver;
     /**
      * @var ComposerResolver
@@ -36,17 +37,16 @@ class PrepareCommand extends Command
 
     /**
      * @param Factory $prepareConfigFactory
-     * @param Prepare $prepare
      * @param PathResolver $pathResolver
      * @param ComposerResolver $composerResolver
      * @param HotfixApplier $hotfixApplier
      */
     public function __construct(
-        Factory $prepareConfigFactory,
-        Prepare $prepare,
-        PathResolver $pathResolver,
-        ComposerResolver $composerResolver,
-        HotfixApplier $hotfixApplier
+        Factory             $prepareConfigFactory,
+        StrategyInterface   $prepare,
+        PathResolver        $pathResolver,
+        ComposerResolver    $composerResolver,
+        HotfixApplier       $hotfixApplier
     ) {
         parent::__construct();
         $this->prepareConfigFactory = $prepareConfigFactory;
@@ -78,6 +78,20 @@ class PrepareCommand extends Command
             'dev-develop'
         );
         $this->addOption(
+            'strategy',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'Specify the deployment strategy to use. Default is "traditional". You can also use "VCS" to use the new VCS installer.',
+            'traditional'
+        );
+        $this->addOption(
+            'cloud-branch',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'Specify the branch of magento-cloud to clone as a base.',
+            'master'
+        );
+        $this->addOption(
             'cloud-branch',
             null,
             InputOption::VALUE_REQUIRED,
@@ -104,6 +118,7 @@ class PrepareCommand extends Command
         $config->setEceVersion($input->getOption('ece-version'));
         $config->setCloudBranch($input->getOption('cloud-branch'));
         $config->setIsComposer2((int)$this->composerResolver->resolve() === 2);
+        $config->setStrategy($input->getOption('strategy'));
 
         $this->prepare->execute($config);
 

@@ -20,6 +20,24 @@ class PrepareConfig
 
     private string $cloudBranch;
 
+    private string $strategy;
+
+    /**
+     * @return string
+     */
+    public function getStrategy(): string
+    {
+        return $this->strategy;
+    }
+
+    /**
+     * @param string $strategy
+     */
+    public function setStrategy(string $strategy): void
+    {
+        $this->strategy = $strategy;
+    }
+
     /**
      * @return bool
      */

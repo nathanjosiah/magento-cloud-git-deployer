@@ -50,7 +50,13 @@ class ObjectManager implements ContainerInterface
         static::$instance = $objectManager;
     }
 
-    public function create($id, array $parameters = [])
+    /**
+     * @template T
+     * @param class-string<T> $id
+     * @param array $parameters
+     * @return T
+     */
+    public function create($id, array $parameters = []): object
     {
         return $this->injector->create($id, $parameters);
     }
@@ -64,7 +70,9 @@ class ObjectManager implements ContainerInterface
     }
 
     /**
-     * @inheritDoc
+     * @template T
+     * @param class-string<T> $id
+     * @return T
      */
     public function get($id)
     {

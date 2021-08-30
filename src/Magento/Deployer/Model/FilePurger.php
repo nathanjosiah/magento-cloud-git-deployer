@@ -53,7 +53,6 @@ class FilePurger
             }
         }
 
-        $this->logger->info('<fg=blue>Purging folder of all but minimum files.');
         $files = scandir($path);
         array_shift($files); //.
         array_shift($files); //..

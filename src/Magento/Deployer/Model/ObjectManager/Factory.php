@@ -11,6 +11,9 @@ namespace Magento\Deployer\Model\ObjectManager;
 
 use Magento\Deployer\Model\ObjectManager;
 
+/**
+ * @template T
+ */
 class Factory
 {
     private ObjectManager $objectManager;
@@ -18,7 +21,7 @@ class Factory
 
     /**
      * @param ObjectManager $objectManager
-     * @param string $class
+     * @param class-string<T> $class
      */
     public function __construct(ObjectManager $objectManager, string $class)
     {
@@ -26,7 +29,11 @@ class Factory
         $this->class = $class;
     }
 
-    public function create(array $parameters = [])
+    /**
+     * @param array $parameters
+     * @return T
+     */
+    public function create(array $parameters = []): object
     {
         return $this->objectManager->create($this->class, $parameters);
     }
