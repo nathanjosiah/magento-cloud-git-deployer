@@ -70,46 +70,22 @@ class VcsStrategy {
         $this->logger->info('<fg=blue>Running composer update');
         $this->shellExecutor->execute('composer update --ansi --no-interaction');
 
+        $composer['extra']['deploy']['repo'] = [
+            'magento/magento2ce' => [
+                'url' => 'git@github.com:magento-commerce/magento2ce.git',
+                'ref' => 'dev-2.4-develop'
+            ],
+            'magento/magento2ee' => [
+                'url' => 'git@github.com:magento-commerce/magento2ee.git',
+                'ref' => 'dev-2.4-develop'
+            ],
+            'magento/inventory' => [
+                'url' => 'git@github.com:magento-commerce/inventory.git',
+                'ref' => 'dev-1.2-develop'
+           ]
+        ];
 
-        exit;
-
-        $this->logger->info('<fg=blue>Replacing composer "require" with only ece-tools');
-        $this->logger->info('<fg=blue>Adding required composer repositories');
-        $composer = $this->composerFactory->create(['path' => $config->getPath()]);
-        $composer->addInitialGitSupport($config->getEceVersion());
-
-        if ($config->isComposer2()) {
-            $this->logger->info('<fg=blue>Configuring .magento.app.yaml for composer 2.');
-            $composer->addComposer2Support();
-        } else {
-            $this->logger->info('<fg=blue>Using composer 1 so no .magento.app.yaml changes needed.');
-        }
-
-        $this->logger->info('<fg=blue>Writing composer.json');
-        $composer->write();
-
-        $this->logger->info('<fg=blue>Running composer update');
-        $this->shellExecutor->execute('composer update --ansi --no-interaction');
-
-        $this->logger->info('<fg=blue>Saving copy of composer.json before dev:git:update-composer to <fg=yellow> original-composer.json');
-        $composer->write('original-composer.json');
-
-        $this->logger->info('<fg=blue>Running <fg=yellow>dev:git:update-composer');
-        $this->shellExecutor->execute('vendor/bin/ece-tools dev:git:update-composer');
-
-        if (array_search('monolog-and-es', $config->getHotfixes()) !== false) {
-            $this->hotfixApplier->apply('monolog-and-es');
-        }
-
-        $this->logger->info('<fg=blue>Replacing composer autoload with mainline cloud autoload.');
-        $mainlineComposer = $this->composerFactory->create(['path' => $config->getPath() . '/cloud_tmp']);
-        $localComposer = $this->composerFactory->create(['path' => $config->getPath()]);
-        $localComposer['autoload'] = $mainlineComposer['autoload'];
-
-        $this->logger->info('<fg=blue>composer.json after dev:git:update-composer saved to composer.json');
-        $localComposer->write();
         $this->cloudCloner->cleanup();
-
         $this->logger->info('<fg=green>Complete!');
     }
 }
