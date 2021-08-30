@@ -29,14 +29,11 @@ class PrepareCommand extends Command
     private Factory $prepareConfigFactory;
     private StrategyInterface $prepare;
     private PathResolver $pathResolver;
-    /**
-     * @var ComposerResolver
-     */
     private ComposerResolver $composerResolver;
     private HotfixApplier $hotfixApplier;
 
     /**
-     * @param Factory $prepareConfigFactory
+     * @param Factory<PrepareConfig> $prepareConfigFactory
      * @param PathResolver $pathResolver
      * @param ComposerResolver $composerResolver
      * @param HotfixApplier $hotfixApplier
@@ -85,11 +82,45 @@ class PrepareCommand extends Command
             'traditional'
         );
         $this->addOption(
-            'cloud-branch',
+            'ce',
             null,
-            InputOption::VALUE_REQUIRED,
-            'Specify the branch of magento-cloud to clone as a base.',
-            'master'
+            InputOption::VALUE_OPTIONAL,
+            'Format <org>/<branch>',
+            'magento-commerce/dev-2.4-develop'
+        );
+        $this->addOption(
+            'ee',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Format <org>/<branch>',
+            'magento-commerce/dev-2.4-develop'
+        );
+        $this->addOption(
+            'b2b',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Format <org>/<branch>',
+            'magento-commerce/dev-1.2-develop'
+        );
+        $this->addOption(
+            'sp',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Format <org>/<branch>',
+            'magento-commerce/dev-develop'
+        );
+        $this->addOption(
+            'fastly',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Format <org>/<branch>',
+            'fastly/fastly-magento2:dev-master'
+        );
+        $this->addOption(
+            'add',
+            null,
+            InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+            'E.g. --add magento-cia/adobe-stock-integration:dev-develop --add fastly/fastly-magento2:dev-master'
         );
         $this->addOption(
             'cloud-branch',
@@ -110,7 +141,6 @@ class PrepareCommand extends Command
         $path = $this->pathResolver->resolveExistingProjectWithUserInput($input->getArgument('directory'));
         $this->hotfixApplier->validateAllExist($input->getOption('hotfix'));
 
-        /** @var PrepareConfig $config */
         $config = $this->prepareConfigFactory->create();
         $config->setPath($path);
         $config->setExclude($input->getOption('exclude'));
@@ -119,6 +149,12 @@ class PrepareCommand extends Command
         $config->setCloudBranch($input->getOption('cloud-branch'));
         $config->setIsComposer2((int)$this->composerResolver->resolve() === 2);
         $config->setStrategy($input->getOption('strategy'));
+        $config->setCommunityEdition($input->getOption('ce'));
+        $config->setEnterpriseEdition($input->getOption('ee'));
+        $config->setBusinessEdition($input->getOption('b2b'));
+        $config->setSecurityPackage($input->getOption('sp'));
+        $config->setFastly($input->getOption('fastly'));
+        $config->setAdditionalRepos($input->getOption('add'));
 
         $this->prepare->execute($config);
 

@@ -11,16 +11,113 @@ namespace Magento\Deployer\Model\Config;
 class PrepareConfig
 {
     private string $path;
-
     private array $exclude;
-
     private array $hotfixes = [];
-
     private string $eceVersion;
-
     private string $cloudBranch;
-
     private string $strategy;
+    private ?string $communityEdition;
+    private ?string $enterpriseEdition;
+    private ?string $businessEdition;
+    private ?string $securityPackage;
+    private ?string $fastly;
+    private array $additionalRepos;
+
+    /**
+     * @return string|null
+     */
+    public function getCommunityEdition(): ?string
+    {
+        return $this->communityEdition;
+    }
+
+    /**
+     * @param string|null $communityEdition
+     */
+    public function setCommunityEdition(?string $communityEdition): void
+    {
+        $this->communityEdition = $communityEdition;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEnterpriseEdition(): ?string
+    {
+        return $this->enterpriseEdition;
+    }
+
+    /**
+     * @param string|null $enterpriseEdition
+     */
+    public function setEnterpriseEdition(?string $enterpriseEdition): void
+    {
+        $this->enterpriseEdition = $enterpriseEdition;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBusinessEdition(): ?string
+    {
+        return $this->businessEdition;
+    }
+
+    /**
+     * @param string|null $businessEdition
+     */
+    public function setBusinessEdition(?string $businessEdition): void
+    {
+        $this->businessEdition = $businessEdition;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSecurityPackage(): ?string
+    {
+        return $this->securityPackage;
+    }
+
+    /**
+     * @param string|null $securityPackage
+     */
+    public function setSecurityPackage(?string $securityPackage): void
+    {
+        $this->securityPackage = $securityPackage;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getFastly(): ?string
+    {
+        return $this->fastly;
+    }
+
+    /**
+     * @param string|null $fastly
+     */
+    public function setFastly(?string $fastly): void
+    {
+        $this->fastly = $fastly;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAdditionalRepos(): array
+    {
+        return $this->additionalRepos;
+    }
+
+    /**
+     * @param array $additionalRepos
+     */
+    public function setAdditionalRepos(array $additionalRepos): void
+    {
+        $this->additionalRepos = $additionalRepos;
+    }
 
     /**
      * @return string

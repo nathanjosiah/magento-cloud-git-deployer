@@ -36,13 +36,17 @@ class MonologAndEs implements HotfixInterface
     public function apply(): void
     {
         $composer = $this->composerFactory->create(['path'=> getcwd()]);
-        $composer['repositories']['magento-cloud-patches']['url'] = 'git@github.com:magento-cia/magento-cloud-components.git';
-        $composer['repositories']['magento-cloud-components']['url'] = 'git@github.com:magento/magento-cloud-patches.git';
-        $composer['repositories']['ece-tools']['url'] = 'git@github.com:magento-cia/ece-tools.git';
-        $composer['require']['magento/ece-tools'] = 'dev-ACMP-1263-2';
-        $composer['require']['magento/magento-cloud-patches'] = 'dev-ACMP-1263 as 1.0.11';
-        $composer['require']['magento/magento-cloud-components'] = 'dev-ACMP-1263-2 as 1.0.8';
-        $composer['require']['elasticsearch/elasticsearch'] = 'v7.11.0';
+        $repos = $composer['repositories'];
+        $repos['magento-cloud-patches']['url'] = 'git@github.com:magento-cia/magento-cloud-components.git';
+        $repos['magento-cloud-components']['url'] = 'git@github.com:magento/magento-cloud-patches.git';
+        $repos['ece-tools']['url'] = 'git@github.com:magento-cia/ece-tools.git';
+        $composer['repositories'] = $repos;
+        $requires = $composer['requires'];
+        $requires['magento/ece-tools'] = 'dev-ACMP-1263-2';
+        $requires['magento/magento-cloud-patches'] = 'dev-ACMP-1263 as 1.0.11';
+        $requires['magento/magento-cloud-components'] = 'dev-ACMP-1263-2 as 1.0.8';
+        $requires['elasticsearch/elasticsearch'] = 'v7.11.0';
+        $composer['requires'] = $requires;
         $this->logger->info('<fg=cyan>Overwriting composer.json with hotfix changes');
         $composer->write();
         $this->logger->info('<fg=cyan>Running composer update');

@@ -21,7 +21,6 @@ class Factory
 
     /**
      * @param ObjectManager $objectManager
-     * @param class-string<T> $class
      */
     public function __construct(ObjectManager $objectManager, string $class)
     {

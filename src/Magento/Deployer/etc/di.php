@@ -35,10 +35,16 @@ return [
                 'composerFactory' => new FactoryProxy(\Magento\Deployer\Model\Composer::class)
             ]
         ],
+        \Magento\Deployer\Model\PrepareStrategy\VcsStrategy::class => [
+            'parameters' => [
+                'composerFactory' => new FactoryProxy(\Magento\Deployer\Model\Composer::class)
+            ]
+        ],
         \Magento\Deployer\Model\PrepareStrategy\CompositeStrategy::class => [
             'parameters' => [
                 'strategies' => new ObjectArrayResolver([
                     'traditional' => \Magento\Deployer\Model\PrepareStrategy\TraditionalStrategy::class,
+                    'vcs' => \Magento\Deployer\Model\PrepareStrategy\VcsStrategy::class,
                 ])
             ]
         ],

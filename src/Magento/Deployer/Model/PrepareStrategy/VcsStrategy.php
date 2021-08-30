@@ -60,9 +60,15 @@ class VcsStrategy {
         $this->logger->info('<fg=blue>Cloning mainline cloud project');
         $this->cloudCloner->cloneToCwd($config->getCloudBranch(), false);
 
-        $this->logger->info('<fg=blue>Adding VCS repo, VCS+ECE require.');
+        $this->logger->info('<fg=blue>Removing all magento/* requires');
         $composer = $this->composerFactory->create(['path' => $config->getPath()]);
-        $composer->addVcsRepo('^1.0', $config->getEceVersion());
+        $composer->removeMagentoRequires();
+
+        $this->logger->info('<fg=blue>Adding VCS+ECE repo, VCS+ECE require.');
+        $composer->addVcsComposerRepo('dev-develop', $config->getEceVersion());
+
+        $this->logger->info('<fg=blue>Removing composer.json "scripts"');
+        $composer->stripScripts();
 
         $this->logger->info('<fg=blue>Writing composer.json');
         $composer->write();
@@ -70,20 +76,34 @@ class VcsStrategy {
         $this->logger->info('<fg=blue>Running composer update');
         $this->shellExecutor->execute('composer update --ansi --no-interaction');
 
-        $composer['extra']['deploy']['repo'] = [
-            'magento/magento2ce' => [
-                'url' => 'git@github.com:magento-commerce/magento2ce.git',
-                'ref' => 'dev-2.4-develop'
-            ],
-            'magento/magento2ee' => [
-                'url' => 'git@github.com:magento-commerce/magento2ee.git',
-                'ref' => 'dev-2.4-develop'
-            ],
-            'magento/inventory' => [
-                'url' => 'git@github.com:magento-commerce/inventory.git',
-                'ref' => 'dev-1.2-develop'
-           ]
-        ];
+        $repos = [];
+        $repos['magento2ce'] = $config->getCommunityEdition();
+        $repos['magento2ee'] = $config->getEnterpriseEdition();
+        $repos['magento2b2b'] = $config->getBusinessEdition();
+        $repos['security-package'] = $config->getSecurityPackage();
+
+        foreach ($repos as $key => $declared) {
+            if (empty($declared)) {
+                continue;
+            }
+            [$org, $ref] = explode('/', $declared, 2);
+            $composer->addVcsRepo($org . '/' . $key, $ref);
+        }
+
+        $repos = [];
+        $repos[] = $config->getFastly();
+        $repos = array_merge($repos, $config->getAdditionalRepos() ?? []);
+        foreach ($repos as $declared) {
+            if (empty($declared)) {
+                continue;
+            }
+            [$repo, $ref] = explode(':', $declared, 2);
+            $composer->addVcsRepo($repo, $ref);
+        }
+
+        $composer->write();
+        $this->logger->info('<fg=blue>Running composer update');
+        $this->shellExecutor->execute('composer update --ansi --no-interaction');
 
         $this->cloudCloner->cleanup();
         $this->logger->info('<fg=green>Complete!');

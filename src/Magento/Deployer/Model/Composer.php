@@ -28,6 +28,22 @@ class Composer implements \ArrayAccess
         $this->logger = $logger;
     }
 
+    public function removeMagentoRequires(): void
+    {
+        $requires = $this->composer['require'];
+        foreach ($requires as $require => $version) {
+            if (strpos($require, 'magento/') === 0) {
+                unset($this->composer['require'][$require]);
+            }
+        }
+    }
+
+    public function stripScripts(): void
+    {
+        // Has to be an object or it gets encoded to []
+        $this->composer['scripts'] = new \stdClass();
+    }
+
     public function addInitialGitSupport(string $eceVersion): void
     {
         $deps = ['magento/ece-tools' => $eceVersion];
@@ -71,15 +87,31 @@ class Composer implements \ArrayAccess
         file_put_contents($this->path . '/.magento.app.yaml', Yaml::dump($appYaml));
     }
 
-    public function addVcsRepo(string $version, string $eceVersion): void
+    public function addVcsComposerRepo(string $version, string $eceVersion): void
     {
         $this->composer['repositories']['vcs'] = [
             'type' => 'git',
             'url' => 'git@github.com:magento-commerce/magento-vcs-installer.git'
         ];
+        $this->composer['repositories']['ece-tools'] = [
+            'type' => 'git',
+            'url' => 'git@github.com:magento/ece-tools.git'
+        ];
         $this->composer['minimum-stability'] = 'dev';
+        $this->composer['config']['process-timeout'] = 0;
         $this->composer['require']['magento/magento-vcs-installer'] = $version;
         $this->composer['require']['magento/ece-tools'] = $eceVersion;
+    }
+
+    public function addVcsRepo(string $repo, string $ref): void
+    {
+        if (!isset($this->composer['extra']['deploy']['repo'])) {
+            $this->composer['extra']['deploy']['repo'] = [];
+        }
+        $this->composer['extra']['deploy']['repo'][$repo] = [
+            'url' => 'git@github.com:' . $repo . '.git',
+            'ref' => $ref
+        ];
     }
 
     public function write(string $filename = 'composer.json'): void
