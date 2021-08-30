@@ -11,36 +11,32 @@ class Prepare {
     private ShellExecutor $shellExecutor;
     private CloudCloner $cloudCloner;
     private FilePurger $filePurger;
+    private HotfixApplier $hotfixApplier;
 
     /**
      * @param LoggerInterface $logger
      * @param ShellExecutor $shellExecutor
      * @param CloudCloner $cloudCloner
      * @param FilePurger $filePurger
+     * @param HotfixApplier $hotfixApplier
      */
     public function __construct(
         LoggerInterface $logger,
         ShellExecutor $shellExecutor,
         CloudCloner $cloudCloner,
-        FilePurger $filePurger
+        FilePurger $filePurger,
+        HotfixApplier $hotfixApplier
     ) {
         $this->logger = $logger;
         $this->shellExecutor = $shellExecutor;
         $this->cloudCloner = $cloudCloner;
         $this->filePurger = $filePurger;
+        $this->hotfixApplier = $hotfixApplier;
     }
 
     public function execute(
         PrepareConfig $config
     ): void {
-        $validHotfixes = ['monolog-and-es'];
-        if (array_diff($validHotfixes, $config->getHotfixes())) {
-            $this->logger->error('Invalid hotfix supplied, valid hotfixes are: "' . implode('", "', $validHotfixes) . '"');
-            exit;
-        }
-
-        $excludedDirs = ['cloud_tmp', '.git', 'auth.json', 'app', '.magento.env.yaml', '.', '..'];
-
         if (!is_writable($config->getPath())) {
             $this->logger->error('Directory is not writable!');
             exit;
@@ -51,29 +47,7 @@ class Prepare {
         $this->logger->info('<fg=blue>Using ece-tools <fg=yellow>' . $config->getEceVersion());
         $deps = ['magento/ece-tools' => $config->getEceVersion()];
 
-        if (!empty($config->getExclude())) {
-            $error = false;
-            foreach ($config->getExclude() as $excludePath) {
-                $excludeRealPath = realpath($excludePath);
-                if (!$excludeRealPath || !file_exists($excludeRealPath)) {
-                    $this->logger->error("Excluded path $excludePath does not exist");
-                    $error = true;
-                } else {
-                    if (strpos($excludeRealPath, $config->getPath()) !== 0) {
-                        $this->logger->error("Exclude path $excludeRealPath isn't in project directory.");
-                        $error = true;
-                    } else {
-                        $excludedDirs[] = substr($excludeRealPath, strlen($config->getPath()) + 1);
-                    }
-                }
-            }
-            if ($error) {
-                exit;
-            }
-        }
-
-
-        $this->filePurger->purgePathWithExceptions($config->getPath(), $excludedDirs);
+        $this->filePurger->purgePathWithExceptions($config->getPath(), $config->getExclude());
 
         $this->cloudCloner->cloneToCwd($config->getCloudBranch(), false);
 
@@ -131,19 +105,8 @@ class Prepare {
         $this->logger->info('<fg=blue>Running <fg=yellow>dev:git:update-composer');
         $this->shellExecutor->execute('vendor/bin/ece-tools dev:git:update-composer');
 
-        if (array_search('monolog-and-es', $config->getHotfixes())) {
-            $this->logger->info('<fg=blue>Applying monolog hotfix');
-            $composer['repositories']['magento-cloud-patches']['url'] = 'git@github.com:magento-cia/magento-cloud-components.git';
-            $composer['repositories']['magento-cloud-components']['url'] = 'git@github.com:magento/magento-cloud-components.git';
-            $composer['repositories']['ece-tools']['url'] = 'git@github.com:magento-cia/ece-tools.git';
-            $composer['require']['magento/ece-tools'] = 'dev-ACMP-1263-2';
-            $composer['require']['magento/magento-cloud-patches'] = 'dev-ACMP-1263 as 1.0.11';
-            $composer['require']['magento/magento-cloud-components'] = 'dev-ACMP-1263-2 as 1.0.8';
-            $composer['require']['elasticsearch/elasticsearch'] = 'v7.11.0';
-            $this->logger->info('<fg=blue>Overwriting composer.json with hotfix changes');
-            file_put_contents('composer.json', json_encode($composer, JSON_PRETTY_PRINT));
-            $this->logger->info('<fg=blue>Running composer update');
-            $this->shellExecutor->execute('composer update --ansi --no-interaction');
+        if (array_search('monolog-and-es', $config->getHotfixes()) !== false) {
+            $this->hotfixApplier->apply('monolog-and-es');
         }
 
         $this->logger->info('<fg=blue>Fixing composer autoloader settings');

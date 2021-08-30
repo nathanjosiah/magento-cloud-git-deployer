@@ -38,6 +38,9 @@ class ComposerResolver
             } else {
                 $this->logger->info('<fg=blue>Found composer version <fg=yellow>' . $matches['version']);
             }
+        } else {
+            $this->logger->error('Could not detect composer version. There may be a problem with your composer.json file.');
+            exit;
         }
 
         return $matches['version'];

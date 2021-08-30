@@ -16,6 +16,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
 class InitCommand extends Command
@@ -61,6 +62,15 @@ class InitCommand extends Command
     {
         $path = $this->pathResolver->resolveNewProjectWithUserInput($input->getArgument('directory'));
         chdir($path);
+
+        if (file_exists($path) && count(scandir($path)) > 2) {
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion('<fg=red>This directory is not empty, are you sure you want to proceed? <fg=blue>(y/n) <fg=green>[default yes]<fg=default>: ');
+            if (!$helper->ask($input, $output, $question)) {
+                $this->logger->error('Directory is not empty');
+                exit;
+            }
+        }
 
         $template = $this->getTemplate();
         $helper = $this->getHelper('question');

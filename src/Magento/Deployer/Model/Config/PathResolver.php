@@ -79,11 +79,6 @@ class PathResolver
             $this->logger->info('<fg=blue>No path provided. Using working directory <fg=yellow>' . $path);
         }
 
-        if (file_exists($path) && count(scandir($path)) > 2) {
-            $this->logger->error('Directory is not empty');
-            exit;
-        }
-
         return $path;
     }
 }
