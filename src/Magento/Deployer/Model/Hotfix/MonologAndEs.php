@@ -40,7 +40,7 @@ class MonologAndEs implements HotfixInterface
         $repos['magento-cloud-patches']['type'] = 'git';
         $repos['magento-cloud-patches']['url'] = 'git@github.com:magento-cia/magento-cloud-components.git';
         $repos['magento-cloud-components']['type'] = 'git';
-        $repos['magento-cloud-components']['url'] = 'git@github.com:magento/magento-cloud-patches.git';
+        $repos['magento-cloud-components']['url'] = 'git@github.com:magento-commerce/magento-cloud-patches.git';
         $repos['ece-tools']['url'] = 'git@github.com:magento-cia/ece-tools.git';
         $composer['repositories'] = $repos;
         $requires = $composer['require'];
