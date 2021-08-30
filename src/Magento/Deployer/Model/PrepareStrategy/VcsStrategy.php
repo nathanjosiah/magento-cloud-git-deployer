@@ -11,7 +11,7 @@ use Magento\Deployer\Model\ObjectManager\Factory;
 use Magento\Deployer\Model\ShellExecutor;
 use Psr\Log\LoggerInterface;
 
-class TraditionalStrategy {
+class VcsStrategy {
     private LoggerInterface $logger;
     private ShellExecutor $shellExecutor;
     private CloudCloner $cloudCloner;
@@ -54,13 +54,24 @@ class TraditionalStrategy {
 
         chdir($config->getPath());
 
-        $this->logger->info('<fg=blue>Using ece-tools <fg=yellow>' . $config->getEceVersion());
-
         $this->logger->info('<fg=blue>Purging folder of all but minimum files.');
         $this->filePurger->purgePathWithExceptions($config->getPath(), $config->getExclude());
 
         $this->logger->info('<fg=blue>Cloning mainline cloud project');
         $this->cloudCloner->cloneToCwd($config->getCloudBranch(), false);
+
+        $this->logger->info('<fg=blue>Adding VCS repo, VCS+ECE require.');
+        $composer = $this->composerFactory->create(['path' => $config->getPath()]);
+        $composer->addVcsRepo('^1.0', $config->getEceVersion());
+
+        $this->logger->info('<fg=blue>Writing composer.json');
+        $composer->write();
+
+        $this->logger->info('<fg=blue>Running composer update');
+        $this->shellExecutor->execute('composer update --ansi --no-interaction');
+
+
+        exit;
 
         $this->logger->info('<fg=blue>Replacing composer "require" with only ece-tools');
         $this->logger->info('<fg=blue>Adding required composer repositories');

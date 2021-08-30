@@ -31,7 +31,7 @@ class Composer implements \ArrayAccess
     public function addInitialGitSupport(string $eceVersion): void
     {
         $deps = ['magento/ece-tools' => $eceVersion];
-        $composer['repositories'] = [
+        $this->composer['repositories'] = [
             'ece-tools' => [
                 'type' => 'git',
                 'url' => 'git@github.com:magento/ece-tools.git'
@@ -53,9 +53,9 @@ class Composer implements \ArrayAccess
                 'url' => 'git@github.com:magento/quality-patches.git'
             ]
         ];
-        unset($composer['autoload']);
-        $composer['require'] = $deps;
-        $composer['replace'] = [
+        unset($this->composer['autoload']);
+        $this->composer['require'] = $deps;
+        $this->composer['replace'] = [
             'magento/magento-cloud-components' => '*'
         ];
     }
@@ -69,6 +69,17 @@ class Composer implements \ArrayAccess
             . 'composer --no-ansi --no-interaction install --no-progress --prefer-dist --optimize-autoloader' . "\n"
             . $appYaml['hooks']['build'];
         file_put_contents($this->path . '/.magento.app.yaml', Yaml::dump($appYaml));
+    }
+
+    public function addVcsRepo(string $version, string $eceVersion): void
+    {
+        $this->composer['repositories']['vcs'] = [
+            'type' => 'git',
+            'url' => 'git@github.com:magento-commerce/magento-vcs-installer.git'
+        ];
+        $this->composer['minimum-stability'] = 'dev';
+        $this->composer['require']['magento/magento-vcs-installer'] = $version;
+        $this->composer['require']['magento/ece-tools'] = $eceVersion;
     }
 
     public function write(string $filename = 'composer.json'): void

@@ -90,6 +90,6 @@ class InitCommand extends Command
 
     private function getTemplate(): string
     {
-        return file_get_contents(BP . '/etc/env-template.yaml');
+        return file_get_contents(BP . '/etc/env-template-traditional.yaml');
     }
 }
