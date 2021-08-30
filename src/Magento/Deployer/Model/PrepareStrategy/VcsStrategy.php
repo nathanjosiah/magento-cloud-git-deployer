@@ -65,7 +65,7 @@ class VcsStrategy {
         $composer->removeMagentoRequires();
 
         $this->logger->info('<fg=blue>Adding VCS+ECE repo, VCS+ECE require.');
-        $composer->addVcsComposerRepo('dev-develop', $config->getEceVersion());
+        $composer->addVcsComposerRepo('^1.0', $config->getEceVersion());
 
         $this->logger->info('<fg=blue>Removing composer.json "scripts"');
         $composer->stripScripts();
@@ -102,8 +102,15 @@ class VcsStrategy {
         }
 
         $composer->write();
-        $this->logger->info('<fg=blue>Running composer update');
-        $this->shellExecutor->execute('composer update --ansi --no-interaction');
+        unset($composer);
+
+        if (array_search('monolog-and-es', $config->getHotfixes()) !== false) {
+            $this->hotfixApplier->apply('monolog-and-es');
+        } else {
+            $this->logger->info('<fg=blue>Running composer update');
+            $this->shellExecutor->execute('composer update --ansi --no-interaction');
+        }
+
 
         $this->cloudCloner->cleanup();
         $this->logger->info('<fg=green>Complete!');

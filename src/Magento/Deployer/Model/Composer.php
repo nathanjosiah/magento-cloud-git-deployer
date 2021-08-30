@@ -40,8 +40,7 @@ class Composer implements \ArrayAccess
 
     public function stripScripts(): void
     {
-        // Has to be an object or it gets encoded to []
-        $this->composer['scripts'] = new \stdClass();
+        unset($this->composer['scripts']);
     }
 
     public function addInitialGitSupport(string $eceVersion): void
