@@ -36,7 +36,9 @@ It also provides automated fixes for common issues as they arise day-to-day that
 10. Push your code.
 
 ## Subsequent deployments
-1. Ensure your 
+1. If you are not using vcs then ensure your `.magento.env.yaml` is configured correctly. If you would like to switch to/from traditional to/from vcs then you can run `cloud-deployer project:init` and follow the instructions. 
+2. Run `cloud-deployer environment:prepare --strategy <strategy>` with the arguments needed for your deployment.
+3. Commit and push. If you are changing versions of magento or branches you may need to follow the [steps below](#to-prepare-for-a-deployment-to-a-different-branch) before pushing your code.
 
 
 # Update
