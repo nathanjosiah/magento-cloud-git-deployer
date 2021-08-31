@@ -15,10 +15,6 @@ This tool allows you to consistently deploy your code to your cloud project usin
 
 It also provides automated fixes for common issues as they arise day-to-day that are not documented as well as fixing undocumented required configuration for various tooling such as composer2 or different magento versions.
 
-# But why?
-
-With this tool, preparing for a deployment is always a single step. And aside from the issues presented in the intro description, when you want to switch branches on your instance you often have to start from scratch because the official tooling such as `ece-tools` and `vcs-installer` are buggy and often have undocumented needs. 
-
 # Installation
 
 1. Add the repo to global composer `composer global config repositories.deployer vcs git@github.com:nathanjosiah/magento-cloud-git-deployer.git`
