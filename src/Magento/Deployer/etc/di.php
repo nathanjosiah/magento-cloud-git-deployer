@@ -67,7 +67,8 @@ return [
         ],
         \Magento\Deployer\Command\PrepareCommand::class => [
             'parameters' => [
-                'prepareConfigFactory' => new FactoryProxy(\Magento\Deployer\Model\Config\PrepareConfig::class)
+                'prepareConfigFactory' => new FactoryProxy(\Magento\Deployer\Model\Config\PrepareConfig::class),
+                'envYamlFactory' => new FactoryProxy(\Magento\Deployer\Model\EnvYaml::class),
             ]
         ],
         \Symfony\Component\Console\Application::class => [

@@ -49,15 +49,15 @@ class Composer implements \ArrayAccess
         $this->composer['repositories'] = [
             'ece-tools' => [
                 'type' => 'git',
-                'url' => 'git@github.com:magento/ece-tools.git'
+                'url' => 'git@github.com:magento-commerce/ece-tools.git'
             ],
             'magento-cloud-components' => [
                 'type' => 'git',
-                'url' => 'git@github.com:magento/magento-cloud-components.git'
+                'url' => 'git@github.com:magento-commerce/magento-cloud-components.git'
             ],
             'magento-cloud-patches' => [
                 'type' => 'git',
-                'url' => 'git@github.com:magento/magento-cloud-patches.git'
+                'url' => 'git@github.com:magento-commerce/magento-cloud-patches.git'
             ],
             'magento-cloud-docker' => [
                 'type' => 'git',
@@ -106,7 +106,6 @@ class Composer implements \ArrayAccess
     {
         file_put_contents($this->path . '/' . $filename, json_encode($this->composer, JSON_PRETTY_PRINT));
     }
-
 
     public function offsetExists($offset): bool
     {

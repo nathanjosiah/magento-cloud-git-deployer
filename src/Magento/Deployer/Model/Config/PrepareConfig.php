@@ -10,6 +10,8 @@ namespace Magento\Deployer\Model\Config;
 
 class PrepareConfig
 {
+    const STRATEGY_TRADITIONAL = 'traditional';
+    const STRATEGY_VCS = 'vcs';
     private string $path;
     private array $exclude;
     private array $hotfixes = [];

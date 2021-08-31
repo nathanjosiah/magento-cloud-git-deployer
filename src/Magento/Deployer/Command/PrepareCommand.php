@@ -11,10 +11,13 @@ namespace Magento\Deployer\Command;
 use Magento\Deployer\Model\Config\ComposerResolver;
 use Magento\Deployer\Model\Config\PathResolver;
 use Magento\Deployer\Model\Config\PrepareConfig;
+use Magento\Deployer\Model\EnvYaml;
+use Magento\Deployer\Model\Exception\EnvYamlNotFoundException;
 use Magento\Deployer\Model\HotfixApplier;
 use Magento\Deployer\Model\ObjectManager\Factory;
 use Magento\Deployer\Model\PrepareStrategy\StrategyInterface;
 use Magento\Deployer\Model\TraditionalStrategy;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,19 +34,26 @@ class PrepareCommand extends Command
     private PathResolver $pathResolver;
     private ComposerResolver $composerResolver;
     private HotfixApplier $hotfixApplier;
+    private Factory $envYamlFactory;
+    private LoggerInterface $logger;
 
     /**
+     * @param LoggerInterface $logger
      * @param Factory<PrepareConfig> $prepareConfigFactory
+     * @param StrategyInterface $prepare
      * @param PathResolver $pathResolver
      * @param ComposerResolver $composerResolver
      * @param HotfixApplier $hotfixApplier
+     * @param Factory<EnvYaml> $envYamlFactory
      */
     public function __construct(
+        LoggerInterface     $logger,
         Factory             $prepareConfigFactory,
         StrategyInterface   $prepare,
         PathResolver        $pathResolver,
         ComposerResolver    $composerResolver,
-        HotfixApplier       $hotfixApplier
+        HotfixApplier       $hotfixApplier,
+        Factory             $envYamlFactory
     ) {
         parent::__construct();
         $this->prepareConfigFactory = $prepareConfigFactory;
@@ -51,6 +61,8 @@ class PrepareCommand extends Command
         $this->pathResolver = $pathResolver;
         $this->composerResolver = $composerResolver;
         $this->hotfixApplier = $hotfixApplier;
+        $this->envYamlFactory = $envYamlFactory;
+        $this->logger = $logger;
     }
 
     protected function configure()
@@ -79,7 +91,7 @@ class PrepareCommand extends Command
             null,
             InputOption::VALUE_REQUIRED,
             'Specify the deployment strategy to use. Default is "traditional". You can also use "VCS" to use the new VCS installer.',
-            'traditional'
+            PrepareConfig::STRATEGY_TRADITIONAL
         );
         $this->addOption(
             'ce',
@@ -139,6 +151,17 @@ class PrepareCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $path = $this->pathResolver->resolveExistingProjectWithUserInput($input->getArgument('directory'));
+        try {
+            $env = $this->envYamlFactory->create(['path' => $path]);
+        } catch (EnvYamlNotFoundException $e) {
+            $this->logger->error('.magento.env.yaml does not exist. Please run "cloud-deployer project:init" to configure this.');
+            return 1;
+        }
+        if (!file_exists($path . '/auth.json')) {
+            $this->logger->error('auth.json does not exist. Please run "cloud-deployer project:init" to configure this or add it manually.');
+            return 1;
+        }
+
         $this->hotfixApplier->validateAllExist($input->getOption('hotfix'));
 
         $config = $this->prepareConfigFactory->create();
@@ -155,6 +178,18 @@ class PrepareCommand extends Command
         $config->setSecurityPackage($input->getOption('sp'));
         $config->setFastly($input->getOption('fastly'));
         $config->setAdditionalRepos($input->getOption('add'));
+
+        if ($config->getStrategy() === PrepareConfig::STRATEGY_TRADITIONAL
+            && !isset($env['stage']['global']['DEPLOY_FROM_GIT_OPTIONS']['repositories'])
+        ) {
+            $this->logger->error('The current .magento.env.yaml is not configured for a traditional deployment. Please run "cloud-deployer project:init" or add the missing repos.');
+            return 1;
+        } elseif ($config->getStrategy() === PrepareConfig::STRATEGY_VCS
+            && isset($env['stage']['global']['DEPLOY_FROM_GIT_OPTIONS']['repositories'])
+        ) {
+            $this->logger->error('The current .magento.env.yaml is configured for a VCS deployment. Please run "cloud-deployer project:init" or remove the extra configuration.');
+            return 1;
+        }
 
         $this->prepare->execute($config);
 

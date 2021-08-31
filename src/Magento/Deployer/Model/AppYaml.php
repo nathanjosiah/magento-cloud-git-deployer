@@ -12,7 +12,7 @@ namespace Magento\Deployer\Model;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Yaml\Yaml;
 
-class AppYaml
+class AppYaml implements \ArrayAccess
 {
     private array $app;
     private string $path;
@@ -46,5 +46,25 @@ class AppYaml
     public function write(): void
     {
         file_put_contents($this->path . '/.magento.app.yaml', Yaml::dump($this->app, 50, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+    }
+
+    public function offsetExists($offset): bool
+    {
+        return array_key_exists($offset, $this->app);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->app[$offset];
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        $this->app[$offset] = $value;
+    }
+
+    public function offsetUnset($offset)
+    {
+        unset($this->app[$offset]);
     }
 }

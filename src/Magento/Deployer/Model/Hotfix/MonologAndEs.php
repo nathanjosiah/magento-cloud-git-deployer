@@ -36,13 +36,6 @@ class MonologAndEs implements HotfixInterface
     public function apply(): void
     {
         $composer = $this->composerFactory->create(['path'=> getcwd()]);
-        $repos = $composer['repositories'];
-        $repos['magento-cloud-patches']['type'] = 'git';
-        $repos['magento-cloud-patches']['url'] = 'git@github.com:magento-commerce/magento-cloud-components.git';
-        $repos['magento-cloud-components']['type'] = 'git';
-        $repos['magento-cloud-components']['url'] = 'git@github.com:magento-commerce/magento-cloud-patches.git';
-        $repos['ece-tools']['url'] = 'git@github.com:magento-commerce/ece-tools.git';
-        $composer['repositories'] = $repos;
         $requires = $composer['require'];
         $requires['magento/ece-tools'] = 'dev-ACMP-1263 as 2002.1.99';
         $requires['magento/magento-cloud-patches'] = 'dev-ACMP-1263 as 1.0.99';
