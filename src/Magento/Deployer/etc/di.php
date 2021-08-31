@@ -32,12 +32,14 @@ return [
         ],
         \Magento\Deployer\Model\PrepareStrategy\TraditionalStrategy::class => [
             'parameters' => [
-                'composerFactory' => new FactoryProxy(\Magento\Deployer\Model\Composer::class)
+                'composerFactory' => new FactoryProxy(\Magento\Deployer\Model\Composer::class),
+                'appYamlFactory' => new FactoryProxy(\Magento\Deployer\Model\AppYaml::class),
             ]
         ],
         \Magento\Deployer\Model\PrepareStrategy\VcsStrategy::class => [
             'parameters' => [
-                'composerFactory' => new FactoryProxy(\Magento\Deployer\Model\Composer::class)
+                'composerFactory' => new FactoryProxy(\Magento\Deployer\Model\Composer::class),
+                'appYamlFactory' => new FactoryProxy(\Magento\Deployer\Model\AppYaml::class),
             ]
         ],
         \Magento\Deployer\Model\PrepareStrategy\CompositeStrategy::class => [

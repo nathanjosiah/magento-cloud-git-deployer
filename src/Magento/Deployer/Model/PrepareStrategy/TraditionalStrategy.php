@@ -2,6 +2,7 @@
 
 namespace Magento\Deployer\Model\PrepareStrategy;
 
+use Magento\Deployer\Model\AppYaml;
 use Magento\Deployer\Model\CloudCloner;
 use Magento\Deployer\Model\Composer;
 use Magento\Deployer\Model\Config\PrepareConfig;
@@ -18,6 +19,7 @@ class TraditionalStrategy {
     private FilePurger $filePurger;
     private HotfixApplier $hotfixApplier;
     private Factory $composerFactory;
+    private Factory $appYamlFactory;
 
     /**
      * @param LoggerInterface $logger
@@ -26,6 +28,7 @@ class TraditionalStrategy {
      * @param FilePurger $filePurger
      * @param HotfixApplier $hotfixApplier
      * @param Factory<Composer> $composerFactory
+     * @param Factory<AppYaml> $appYamlFactory
      */
     public function __construct(
         LoggerInterface $logger,
@@ -33,7 +36,8 @@ class TraditionalStrategy {
         CloudCloner $cloudCloner,
         FilePurger $filePurger,
         HotfixApplier $hotfixApplier,
-        Factory $composerFactory
+        Factory $composerFactory,
+        Factory $appYamlFactory
     ) {
         $this->logger = $logger;
         $this->shellExecutor = $shellExecutor;
@@ -41,6 +45,7 @@ class TraditionalStrategy {
         $this->filePurger = $filePurger;
         $this->hotfixApplier = $hotfixApplier;
         $this->composerFactory = $composerFactory;
+        $this->appYamlFactory = $appYamlFactory;
     }
 
     public function execute(
@@ -69,7 +74,9 @@ class TraditionalStrategy {
 
         if ($config->isComposer2()) {
             $this->logger->info('<fg=blue>Configuring .magento.app.yaml for composer 2.');
-            $composer->addComposer2Support();
+            $appYaml = $this->appYamlFactory->create(['path' => $config->getPath()]);
+            $appYaml->addComposer2Support();
+            $appYaml->write();
         } else {
             $this->logger->info('<fg=blue>Using composer 1 so no .magento.app.yaml changes needed.');
         }

@@ -2,6 +2,7 @@
 
 namespace Magento\Deployer\Model\PrepareStrategy;
 
+use Magento\Deployer\Model\AppYaml;
 use Magento\Deployer\Model\CloudCloner;
 use Magento\Deployer\Model\Composer;
 use Magento\Deployer\Model\Config\PrepareConfig;
@@ -18,6 +19,7 @@ class VcsStrategy {
     private FilePurger $filePurger;
     private HotfixApplier $hotfixApplier;
     private Factory $composerFactory;
+    private Factory $appYamlFactory;
 
     /**
      * @param LoggerInterface $logger
@@ -26,6 +28,7 @@ class VcsStrategy {
      * @param FilePurger $filePurger
      * @param HotfixApplier $hotfixApplier
      * @param Factory<Composer> $composerFactory
+     * @param Factory<AppYaml> $appYamlFactory
      */
     public function __construct(
         LoggerInterface $logger,
@@ -33,7 +36,8 @@ class VcsStrategy {
         CloudCloner $cloudCloner,
         FilePurger $filePurger,
         HotfixApplier $hotfixApplier,
-        Factory $composerFactory
+        Factory $composerFactory,
+        Factory $appYamlFactory
     ) {
         $this->logger = $logger;
         $this->shellExecutor = $shellExecutor;
@@ -41,6 +45,7 @@ class VcsStrategy {
         $this->filePurger = $filePurger;
         $this->hotfixApplier = $hotfixApplier;
         $this->composerFactory = $composerFactory;
+        $this->appYamlFactory = $appYamlFactory;
     }
 
     public function execute(
@@ -59,6 +64,18 @@ class VcsStrategy {
 
         $this->logger->info('<fg=blue>Cloning mainline cloud project');
         $this->cloudCloner->cloneToCwd($config->getCloudBranch(), false);
+
+        $appYaml = $this->appYamlFactory->create(['path' => $config->getPath()]);
+        if ($config->isComposer2()) {
+            $this->logger->info('<fg=blue>Configuring .magento.app.yaml for composer 2.');
+            $appYaml->addComposer2Support();
+        } else {
+            $this->logger->info('<fg=blue>Adding composer install to build hook.');
+            $appYaml->addComposerInstallToBuild();
+        }
+
+        $this->logger->info('<fg=blue>Saving .magento.app.yaml');
+        $appYaml->write();
 
         $this->logger->info('<fg=blue>Removing all magento/* requires');
         $composer = $this->composerFactory->create(['path' => $config->getPath()]);

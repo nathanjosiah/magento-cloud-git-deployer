@@ -75,17 +75,6 @@ class Composer implements \ArrayAccess
         ];
     }
 
-    public function addComposer2Support(): void
-    {
-        $appYaml = Yaml::parseFile($this->path . '/.magento.app.yaml');
-        $appYaml['build']['flavor'] = 'none';
-        $appYaml['dependencies']['php']['composer/composer'] = '^2.0';
-        $appYaml['hooks']['build'] = 'set -e' . "\n"
-            . 'composer --no-ansi --no-interaction install --no-progress --prefer-dist --optimize-autoloader' . "\n"
-            . $appYaml['hooks']['build'];
-        file_put_contents($this->path . '/.magento.app.yaml', Yaml::dump($appYaml));
-    }
-
     public function addVcsComposerRepo(string $version, string $eceVersion): void
     {
         $this->composer['repositories']['vcs'] = [
