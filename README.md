@@ -15,12 +15,29 @@ This tool allows you to consistently deploy your code to your cloud project usin
 
 It also provides automated fixes for common issues as they arise day-to-day that are not documented as well as fixing undocumented required configuration for various tooling such as composer2 or different magento versions.
 
-# Installation
+# Getting Started
 
+## Installation
 1. Add the repo to global composer `composer global config repositories.deployer vcs git@github.com:nathanjosiah/magento-cloud-git-deployer.git`
-1. Enable dev dependencies `composer global config minimum-stability dev`
-1. Install the tool `composer global require nathanjosiah/magento-cloud-git-deployer`
-1. Verify your installation with `cloud-deployer --version`. You should see something like `Magento Cloud Git Deployer CLI dev`.
+2. Enable dev dependencies `composer global config minimum-stability dev`
+3. Install the tool `composer global require nathanjosiah/magento-cloud-git-deployer`
+4. Verify your installation with `cloud-deployer --version`. You should see something like `Magento Cloud Git Deployer CLI dev`.
+
+## Initial project setup
+1. [Install the cloud CLI](https://devdocs.magento.com/cloud/reference/cli-ref-topic.html)
+2. Clone your cloud project with git (from the [magento.cloud](https://magento.cloud/) UI) or magento-cloud (`magento-cloud project:get ...`).
+3. Decide if you want a traditional or VCS install. (Use VCS if you don't know.)
+4. Open your project in a shell/terminal and run `cloud-deployer project:init <type>`.
+5. Configure setup your `auth.json` credentials.
+6. If you are using the traditional method, also ensure your `.magento.env.yaml` repo's and branches look correct.
+7. Run `cloud-deployer environment:prepare --strategy <strategy>`. (use vcs if you aren't sure). 
+8. Commit all files.
+9. If you are pushing to an existing environment, you may need to follow the [steps below](#to-prepare-for-a-deployment-to-a-different-branch) before pushing your code.
+10. Push your code.
+
+## Subsequent deployments
+1. Ensure your 
+
 
 # Update
 1. Run `cloud-deployer self-update`

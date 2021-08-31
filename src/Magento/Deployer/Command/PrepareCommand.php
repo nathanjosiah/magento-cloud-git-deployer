@@ -162,6 +162,13 @@ class PrepareCommand extends Command
             return 1;
         }
 
+        if (!in_array($input->getOption('strategy'),
+            [PrepareConfig::STRATEGY_TRADITIONAL, PrepareConfig::STRATEGY_VCS])
+        ) {
+            $this->logger->error('Invalid strategy "' . $input->getOption('strategy') . '". Options are "traditional" or "vcs"');
+            return 1;
+        }
+
         $this->hotfixApplier->validateAllExist($input->getOption('hotfix'));
 
         $config = $this->prepareConfigFactory->create();
