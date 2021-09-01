@@ -82,7 +82,7 @@ class VcsStrategy {
         $composer->removeMagentoRequires();
 
         $this->logger->info('<fg=blue>Adding VCS+ECE repo, VCS+ECE require.');
-        $composer->addVcsComposerRepo('^1.0', $config->getEceVersion());
+        $composer->addVcsPlugin('^1.0', $config->getEceVersion());
 
         $this->logger->info('<fg=blue>Removing composer.json "scripts"');
         $composer->stripScripts();

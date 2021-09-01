@@ -12,6 +12,7 @@ class PrepareConfig
 {
     const STRATEGY_TRADITIONAL = 'traditional';
     const STRATEGY_VCS = 'vcs';
+    const STRATEGY_COMPOSER = 'composer';
     private string $path;
     private array $exclude;
     private array $hotfixes = [];

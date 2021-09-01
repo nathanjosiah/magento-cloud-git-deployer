@@ -17,16 +17,19 @@ class AppYaml implements \ArrayAccess
     private array $app;
     private string $path;
     private LoggerInterface $logger;
+    private string $filename;
 
     /**
      * @param LoggerInterface $logger
      * @param string $path
+     * @param string $filename
      */
-    public function __construct(LoggerInterface $logger, string $path)
+    public function __construct(LoggerInterface $logger, string $path, string $filename = '.magento.app.yaml')
     {
-        $this->app = Yaml::parseFile($path . '/.magento.app.yaml');
+        $this->app = Yaml::parseFile($path . '/' . $filename);
         $this->path = $path;
         $this->logger = $logger;
+        $this->filename = $filename;
     }
 
     public function addComposer2Support(): void
@@ -43,9 +46,14 @@ class AppYaml implements \ArrayAccess
             . $this->app['hooks']['build'];
     }
 
+    public function addRelationship(string $name, string $value): void
+    {
+        $this->app['relationships'][$name] = $value;
+    }
+
     public function write(): void
     {
-        file_put_contents($this->path . '/.magento.app.yaml', Yaml::dump($this->app, 50, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+        file_put_contents($this->path . '/' . $this->filename, Yaml::dump($this->app, 50, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
     }
 
     public function offsetExists($offset): bool

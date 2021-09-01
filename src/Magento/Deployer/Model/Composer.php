@@ -38,6 +38,57 @@ class Composer implements \ArrayAccess
         }
     }
 
+    public function addRequire(string $name, string $version): void
+    {
+        $this->composer['require'][$name] = $version;
+    }
+
+    public function removeRequire(string $name): void
+    {
+        unset($this->composer['require'][$name]);
+    }
+    
+    public function addRepo(string $name): void
+    {
+        $repos = [
+            'connect' => [
+                'type' => 'composer',
+                'url' => 'https://connect20-qa01.magedevteam.com'
+            ],
+            'vcs' => [
+                'type' => 'git',
+                'url' => 'git@github.com:magento-commerce/magento-vcs-installer.git',
+                'only' => ['magento/magento-vcs-installer']
+            ],
+            'ece-tools' => [
+                'type' => 'git',
+                'url' => 'git@github.com:magento-commerce/ece-tools.git',
+                'only' => ['magento/ece-tools']
+            ],
+            'magento-cloud-components' => [
+                'type' => 'git',
+                'url' => 'git@github.com:magento-commerce/magento-cloud-components.git',
+                'only' => ['magento/magento-cloud-components']
+            ],
+            'magento-cloud-patches' => [
+                'type' => 'git',
+                'url' => 'git@github.com:magento-commerce/magento-cloud-patches.git',
+                'only' => ['magento/magento-cloud-patches']
+            ],
+            'magento-cloud-docker' => [
+                'type' => 'git',
+                'url' => 'git@github.com:magento/magento-cloud-docker.git',
+                'only' => ['magento/magento-cloud-docker']
+            ],
+            'quality-patches' => [
+                'type' => 'git',
+                'url' => 'git@github.com:magento/quality-patches.git',
+                'only' => ['magento/quality-patches']
+            ]
+        ];
+        $this->composer['repositories'][$name] = $repos[$name];
+    }
+
     public function stripScripts(): void
     {
         unset($this->composer['scripts']);
@@ -46,28 +97,12 @@ class Composer implements \ArrayAccess
     public function addInitialGitSupport(string $eceVersion): void
     {
         $deps = ['magento/ece-tools' => $eceVersion];
-        $this->composer['repositories'] = [
-            'ece-tools' => [
-                'type' => 'git',
-                'url' => 'git@github.com:magento-commerce/ece-tools.git'
-            ],
-            'magento-cloud-components' => [
-                'type' => 'git',
-                'url' => 'git@github.com:magento-commerce/magento-cloud-components.git'
-            ],
-            'magento-cloud-patches' => [
-                'type' => 'git',
-                'url' => 'git@github.com:magento-commerce/magento-cloud-patches.git'
-            ],
-            'magento-cloud-docker' => [
-                'type' => 'git',
-                'url' => 'git@github.com:magento/magento-cloud-docker.git'
-            ],
-            'quality-patches' => [
-                'type' => 'git',
-                'url' => 'git@github.com:magento/quality-patches.git'
-            ]
-        ];
+        $this->composer['repositories'] = [];
+        $this->addRepo('ece-tools');
+        $this->addRepo('magento-cloud-components');
+        $this->addRepo('magento-cloud-patches');
+        $this->addRepo('magento-cloud-docker');
+        $this->addRepo('quality-patches');
         unset($this->composer['autoload']);
         $this->composer['require'] = $deps;
         $this->composer['replace'] = [
@@ -75,16 +110,11 @@ class Composer implements \ArrayAccess
         ];
     }
 
-    public function addVcsComposerRepo(string $version, string $eceVersion): void
+    public function addVcsPlugin(string $version, string $eceVersion): void
     {
-        $this->composer['repositories']['vcs'] = [
-            'type' => 'git',
-            'url' => 'git@github.com:magento-commerce/magento-vcs-installer.git'
-        ];
-        $this->composer['repositories']['ece-tools'] = [
-            'type' => 'git',
-            'url' => 'git@github.com:magento/ece-tools.git'
-        ];
+        $this->composer['repositories']['repo']['exclude'] = ['magento/ece-tools', 'magento/magento-vcs-installer'];
+        $this->addRepo('vcs');
+        $this->addRepo('ece-tools');
         $this->composer['minimum-stability'] = 'dev';
         $this->composer['config']['process-timeout'] = 0;
         $this->composer['require']['magento/magento-vcs-installer'] = $version;
