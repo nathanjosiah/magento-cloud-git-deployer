@@ -17,6 +17,7 @@ use Magento\Deployer\Model\HotfixApplier;
 use Magento\Deployer\Model\ObjectManager\Factory;
 use Magento\Deployer\Model\PrepareStrategy\StrategyInterface;
 use Magento\Deployer\Model\TraditionalStrategy;
+use Magento\Deployer\Util\Filesystem;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -36,6 +37,7 @@ class PrepareCommand extends Command
     private HotfixApplier $hotfixApplier;
     private Factory $envYamlFactory;
     private LoggerInterface $logger;
+    private Filesystem $filesystem;
 
     /**
      * @param LoggerInterface $logger
@@ -45,6 +47,7 @@ class PrepareCommand extends Command
      * @param ComposerResolver $composerResolver
      * @param HotfixApplier $hotfixApplier
      * @param Factory<EnvYaml> $envYamlFactory
+     * @param Filesystem $filesystem
      */
     public function __construct(
         LoggerInterface     $logger,
@@ -53,7 +56,8 @@ class PrepareCommand extends Command
         PathResolver        $pathResolver,
         ComposerResolver    $composerResolver,
         HotfixApplier       $hotfixApplier,
-        Factory             $envYamlFactory
+        Factory             $envYamlFactory,
+        Filesystem          $filesystem
     ) {
         parent::__construct();
         $this->prepareConfigFactory = $prepareConfigFactory;
@@ -63,6 +67,7 @@ class PrepareCommand extends Command
         $this->hotfixApplier = $hotfixApplier;
         $this->envYamlFactory = $envYamlFactory;
         $this->logger = $logger;
+        $this->filesystem = $filesystem;
     }
 
     protected function configure()
@@ -157,7 +162,7 @@ class PrepareCommand extends Command
             $this->logger->error('.magento.env.yaml does not exist. Please run "cloud-deployer project:init" to configure this.');
             return 1;
         }
-        if (!file_exists($path . '/auth.json')) {
+        if (!$this->filesystem->fileExists($path . '/auth.json')) {
             $this->logger->error('auth.json does not exist. Please run "cloud-deployer project:init" to configure this or add it manually.');
             return 1;
         }

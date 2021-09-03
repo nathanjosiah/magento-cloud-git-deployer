@@ -9,28 +9,40 @@ declare(strict_types=1);
 namespace Magento\Deployer\Model;
 
 use Magento\Deployer\Model\Exception\EnvYamlNotFoundException;
+use Magento\Deployer\Util\Filesystem;
+use Symfony\Component\Yaml\Dumper;
+use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Yaml\Yaml;
 
 class EnvYaml implements \ArrayAccess
 {
     private array $env;
     private string $path;
+    private Filesystem $filesystem;
+    private Dumper $yamlDumper;
 
     /**
+     * @param Filesystem $filesystem
+     * @param Dumper $yamlDumper
      * @param string $path
+     * @throws EnvYamlNotFoundException
      */
-    public function __construct(string $path)
+    public function __construct(Filesystem $filesystem, Parser $yamlParser, Dumper $yamlDumper, string $path)
     {
-        if (!file_exists($path . '/.magento.env.yaml')) {
+        if (!$filesystem->fileExists($path . '/.magento.env.yaml')) {
             throw new EnvYamlNotFoundException();
         }
-        $this->env = Yaml::parseFile($path . '/.magento.env.yaml');
+        $this->env = $yamlParser->parse($path . '/.magento.env.yaml');
         $this->path = $path;
+        $this->filesystem = $filesystem;
+        $this->yamlDumper = $yamlDumper;
     }
 
     public function write(): void
     {
-        file_put_contents($this->path . '/.magento.env.yaml', Yaml::dump($this->env, 50, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+        $this->filesystem->writeFile($this->path . '/.magento.env.yaml',
+            $this->yamlDumper->dump($this->env, 50, 0, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)
+        );
     }
 
     public function offsetExists($offset): bool

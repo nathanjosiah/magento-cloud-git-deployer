@@ -16,6 +16,7 @@ use Magento\Deployer\Model\Config\PathResolver;
 use Magento\Deployer\Model\Config\PrepareConfig;
 use Magento\Deployer\Model\FilePurger;
 use Magento\Deployer\Model\ObjectManager\Factory;
+use Magento\Deployer\Util\Filesystem;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -37,6 +38,7 @@ class InitCommand extends Command
     private Factory $composerFactory;
     private Factory $appYamlFactory;
     private ComposerResolver $composerResolver;
+    private Filesystem $filesystem;
 
     /**
      * @param LoggerInterface $logger
@@ -46,6 +48,7 @@ class InitCommand extends Command
      * @param Factory<Composer> $composerFactory
      * @param Factory<AppYaml> $appYamlFactory
      * @param ComposerResolver $composerResolver
+     * @param Filesystem $filesystem
      */
     public function __construct(
         LoggerInterface $logger,
@@ -54,7 +57,8 @@ class InitCommand extends Command
         FilePurger $filePurger,
         Factory $composerFactory,
         Factory $appYamlFactory,
-        ComposerResolver $composerResolver
+        ComposerResolver $composerResolver,
+        Filesystem $filesystem
     ) {
         parent::__construct();
         $this->logger = $logger;
@@ -64,6 +68,7 @@ class InitCommand extends Command
         $this->composerFactory = $composerFactory;
         $this->appYamlFactory = $appYamlFactory;
         $this->composerResolver = $composerResolver;
+        $this->filesystem = $filesystem;
     }
 
     protected function configure()
@@ -104,9 +109,9 @@ class InitCommand extends Command
         }
 
         chdir($path);
+        $helper = $this->getHelper('question');
 
-        if (file_exists($path) && count(scandir($path)) > 2) {
-            $helper = $this->getHelper('question');
+        if ($this->filesystem->fileExists($path) && count($this->filesystem->getFilesInDirectory($path)) > 2) {
             $question = new ConfirmationQuestion('<fg=red>Directory <fg=yellow>' . $path . '<fg=red> is not empty, are you sure you want to proceed? <fg=blue>(y/n) <fg=green>[default yes]<fg=default>: ');
             if (!$helper->ask($input, $output, $question)) {
                 $this->logger->error('Directory is not empty');
@@ -114,16 +119,15 @@ class InitCommand extends Command
             }
         }
 
-        if (!file_exists($path . '/auth.json')) {
+        if (!$this->filesystem->fileExists($path . '/auth.json')) {
             $this->logger->info('<fg=blue>Writing auth.json. <fg=red>Please edit "auth.json" and fill in the correct values!');
-            file_put_contents($path . '/auth.json', $this->getTemplate('auth.json'));
+            $this->filesystem->writeFile($path . '/auth.json', $this->getTemplate('auth.json'));
         }
 
-        $helper = $this->getHelper('question');
         if ($type === PrepareConfig::STRATEGY_TRADITIONAL) {
             $template = $this->getTemplate('env-traditional.yaml');
             $this->logger->info('<fg=blue>Checking for existing auth.json github token');
-            $auth = json_decode(file_get_contents($path . '/auth.json'), true);
+            $auth = json_decode($this->filesystem->readFile($path . '/auth.json'), true);
             $this->logger->info('<fg=blue>Using github token from auth.json');
             if (strpos($auth['http-basic']['github.com']['password'], '<') === false) {
                 $token = $auth['http-basic']['github.com']['password'];
@@ -137,15 +141,15 @@ class InitCommand extends Command
             }
 
             $this->logger->info('<fg=blue>Writing .magento.env.yaml');
-            file_put_contents($path . '/.magento.env.yaml', str_replace('{TOKEN}', $token, $template));
+            $this->filesystem->writeFile($path . '/.magento.env.yaml', str_replace('{TOKEN}', $token, $template));
         } elseif ($type === PrepareConfig::STRATEGY_VCS) {
             $question = new Question('<fg=blue>Which magento version do you plan to deploy? Only specify x.x.x and do not include any -p1 identifiers:<fg=default> ');
             $version = $helper->ask($input, $output, $question);
             $this->logger->info('<fg=blue>Writing .magento.env.yaml');
             $template = $this->getTemplate('env-vcs.yaml');
-            file_put_contents($path . '/.magento.env.yaml', str_replace('{VERSION}', $version, $template));
+            $this->filesystem->writeFile($path . '/.magento.env.yaml', str_replace('{VERSION}', $version, $template));
         } elseif ($type === PrepareConfig::STRATEGY_COMPOSER) {
-            @unlink($path . '/.magento.env.yaml');
+            @$this->filesystem->deleteFile($path . '/.magento.env.yaml');
             $this->filePurger->purgePathWithExceptions($path, $input->getOption('exclude'));
         }
 
@@ -162,7 +166,13 @@ class InitCommand extends Command
 
             $question = new ChoiceQuestion('Which version? ', ['2.4.2-p1', '2.4.3-p1']);
             $version = $helper->ask($input, $output, $question);
-            if ($version === '2.4.2-p1') {
+            if ($version === '2.3.7-p1') {
+                $composer->addRequire("magento/ece-tools", "^2002.1.0");
+                $composer->addRequire("magento/module-paypal-on-boarding", "~100.4.0");
+                $composer->addRequire("fastly/magento2", "^1.2.34");
+                $composer->removeRequire('magento/magento-cloud-metapackage');
+                $composer->addRequire("magento/product-enterprise-edition", "2.3.7-p1");
+            } elseif ($version === '2.4.2-p1') {
                 $composer->addRequire("magento/ece-tools", "^2002.1.0");
                 $composer->addRequire("magento/module-paypal-on-boarding", "~100.4.0");
                 $composer->addRequire("fastly/magento2", "^1.2.34");
@@ -205,6 +215,6 @@ class InitCommand extends Command
 
     private function getTemplate(string $name): string
     {
-        return file_get_contents(BP . '/etc/templates/' . $name);
+        return $this->filesystem->readFile(BP . '/etc/templates/' . $name);
     }
 }

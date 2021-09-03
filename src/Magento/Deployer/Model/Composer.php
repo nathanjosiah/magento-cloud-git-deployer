@@ -8,24 +8,27 @@ declare(strict_types=1);
 
 namespace Magento\Deployer\Model;
 
+use Magento\Deployer\Util\Filesystem;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Yaml\Yaml;
 
 class Composer implements \ArrayAccess
 {
     private array $composer;
     private string $path;
     private LoggerInterface $logger;
+    private Filesystem $filesystem;
 
     /**
      * @param LoggerInterface $logger
+     * @param Filesystem $filesystem
      * @param string $path
      */
-    public function __construct(LoggerInterface $logger, string $path)
+    public function __construct(LoggerInterface $logger, Filesystem $filesystem, string $path)
     {
-        $this->composer = json_decode(file_get_contents($path . '/composer.json'), true);
+        $this->composer = json_decode($filesystem->readFile($path . '/composer.json'), true);
         $this->path = $path;
         $this->logger = $logger;
+        $this->filesystem = $filesystem;
     }
 
     public function removeMagentoRequires(): void
@@ -96,15 +99,15 @@ class Composer implements \ArrayAccess
 
     public function addInitialGitSupport(string $eceVersion): void
     {
-        $deps = ['magento/ece-tools' => $eceVersion];
         $this->composer['repositories'] = [];
         $this->addRepo('ece-tools');
         $this->addRepo('magento-cloud-components');
         $this->addRepo('magento-cloud-patches');
         $this->addRepo('magento-cloud-docker');
         $this->addRepo('quality-patches');
+        $this->disableTimeout();
         unset($this->composer['autoload']);
-        $this->composer['require'] = $deps;
+        $this->composer['require'] = ['magento/ece-tools' => $eceVersion];
         $this->composer['replace'] = [
             'magento/magento-cloud-components' => '*'
         ];
@@ -116,9 +119,14 @@ class Composer implements \ArrayAccess
         $this->addRepo('vcs');
         $this->addRepo('ece-tools');
         $this->composer['minimum-stability'] = 'dev';
-        $this->composer['config']['process-timeout'] = 0;
         $this->composer['require']['magento/magento-vcs-installer'] = $version;
         $this->composer['require']['magento/ece-tools'] = $eceVersion;
+        $this->disableTimeout();
+    }
+
+    public function disableTimeout(): void
+    {
+        $this->composer['config']['process-timeout'] = 0;
     }
 
     public function addVcsRepo(string $repo, string $ref): void
@@ -134,7 +142,7 @@ class Composer implements \ArrayAccess
 
     public function write(string $filename = 'composer.json'): void
     {
-        file_put_contents($this->path . '/' . $filename, json_encode($this->composer, JSON_PRETTY_PRINT));
+        $this->filesystem->writeFile($this->path . '/' . $filename, json_encode($this->composer, JSON_PRETTY_PRINT));
     }
 
     public function offsetExists($offset): bool

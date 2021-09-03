@@ -8,26 +8,29 @@ declare(strict_types=1);
 
 namespace Magento\Deployer\Model\Config;
 
-
+use Magento\Deployer\Util\Filesystem;
 use Psr\Log\LoggerInterface;
 
 class PathResolver
 {
     private LoggerInterface $logger;
+    private Filesystem $filesystem;
 
     /**
      * @param LoggerInterface $logger
+     * @param Filesystem $filesystem
      */
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, Filesystem $filesystem)
     {
         $this->logger = $logger;
+        $this->filesystem = $filesystem;
     }
 
     public function resolveExistingProjectWithUserInput(?string $path = null): string
     {
         if (!empty($path)) {
             $this->logger->info('<fg=blue>Running in <fg=yellow>' . $path);
-            $path = realpath($path);
+            $path = $this->filesystem->realpath($path);
             if ($path) {
                 $this->logger->info('<fg=blue>Resolved to <fg=yellow>' . $path);
             } else {
@@ -35,20 +38,20 @@ class PathResolver
                 exit;
             }
         } else {
-            $path = realpath(getcwd());
+            $path = $this->filesystem->realpath($this->filesystem->getCwd());
             $this->logger->info('<fg=blue>No path provided. Using working directory <fg=yellow>' . $path);
         }
 
         // Sanity checks to ensure the path is probably correct
-        if (!file_exists($path . '/.magento.env.yaml')) {
+        if (!$this->filesystem->fileExists($path . '/.magento.env.yaml')) {
             $this->logger->error('No .magento.env.yaml found in project directory. Assuming this is the wrong directory.');
             exit;
         }
-        if (!file_exists($path . '/.git')) {
+        if (!$this->filesystem->fileExists($path . '/.git')) {
             $this->logger->error('No .git folder found in project directory. Assuming this is the wrong directory.');
             exit;
         }
-        if (!file_exists($path . '/app')) {
+        if (!$this->filesystem->fileExists($path . '/app')) {
             $this->logger->error('No app folder found in project directory. Assuming this is the wrong directory.');
             exit;
         }
@@ -60,14 +63,14 @@ class PathResolver
     {
         if (!empty($path)) {
             $this->logger->info('<fg=blue>Running in <fg=yellow>' . $path);
-            if (!file_exists($path)) {
+            if (!$this->filesystem->fileExists($path)) {
                 $this->logger->info('<fg=blue>Making directory <fg=yellow>' . $path);
-                if (!mkdir($path)) {
+                if (!$this->filesystem->mkdir($path)) {
                     $this->logger->error('Could not make directory ' . $path);
                     exit;
                 }
             }
-            $path = realpath($path);
+            $path = $this->filesystem->realpath($path);
             if ($path) {
                 $this->logger->info('<fg=blue>Resolved to <fg=yellow>' . $path);
             } else {
@@ -75,7 +78,7 @@ class PathResolver
                 exit;
             }
         } else {
-            $path = getcwd();
+            $path = $this->filesystem->getCwd();
             $this->logger->info('<fg=blue>No path provided. Using working directory <fg=yellow>' . $path);
         }
 

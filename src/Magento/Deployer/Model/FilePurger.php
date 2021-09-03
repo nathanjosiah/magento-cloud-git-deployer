@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Magento\Deployer\Model;
 
 
+use Magento\Deployer\Util\Filesystem;
 use Psr\Log\LoggerInterface;
 
 class FilePurger
@@ -16,17 +17,24 @@ class FilePurger
     private LoggerInterface $logger;
     private ShellExecutor $shellExecutor;
     private array $defaultExclusions;
+    private Filesystem $filesystem;
 
     /**
      * @param LoggerInterface $logger
      * @param ShellExecutor $shellExecutor
+     * @param Filesystem $filesystem
      * @param array $defaultExclusions
      */
-    public function __construct(LoggerInterface $logger, ShellExecutor $shellExecutor, array $defaultExclusions)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        ShellExecutor $shellExecutor,
+        Filesystem $filesystem,
+        array $defaultExclusions
+    ) {
         $this->logger = $logger;
         $this->shellExecutor = $shellExecutor;
         $this->defaultExclusions = $defaultExclusions;
+        $this->filesystem = $filesystem;
     }
 
     public function purgePathWithExceptions(string $path, array $exceptions = []): void
@@ -36,7 +44,7 @@ class FilePurger
             $error = false;
             foreach ($exceptions as $excludePath) {
                 $excludeRealPath = realpath($excludePath);
-                if (!$excludeRealPath || !file_exists($excludeRealPath)) {
+                if (!$excludeRealPath || !$this->filesystem->fileExists($excludeRealPath)) {
                     $this->logger->error("Excluded path $excludePath does not exist");
                     $error = true;
                 } else {

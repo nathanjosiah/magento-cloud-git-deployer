@@ -12,6 +12,11 @@ return [
         \Magento\Deployer\Model\PrepareStrategy\StrategyInterface::class => \Magento\Deployer\Model\PrepareStrategy\CompositeStrategy::class
     ],
     'types' => [
+        \Symfony\Component\Yaml\Dumper::class => [
+            'parameters' => [
+                'indentation' => 2
+            ]
+        ],
         \Magento\Deployer\Model\HotfixApplier::class => [
             'parameters' => [
                 'hotfixes' => new ObjectArrayResolver([

@@ -9,26 +9,30 @@ declare(strict_types=1);
 namespace Magento\Deployer\Model;
 
 
+use Magento\Deployer\Util\Filesystem;
 use Psr\Log\LoggerInterface;
 
 class CloudCloner
 {
     private LoggerInterface $logger;
     private ShellExecutor $shellExecutor;
+    private Filesystem $filesystem;
 
     /**
      * @param LoggerInterface $logger
      * @param ShellExecutor $shellExecutor
+     * @param Filesystem $filesystem
      */
-    public function __construct(LoggerInterface $logger, ShellExecutor $shellExecutor)
+    public function __construct(LoggerInterface $logger, ShellExecutor $shellExecutor, Filesystem $filesystem)
     {
         $this->logger = $logger;
         $this->shellExecutor = $shellExecutor;
+        $this->filesystem = $filesystem;
     }
 
     public function cloneToCwd(string $branch, $cleanup = true)
     {
-        if (file_exists('./cloud_tmp')) {
+        if ($this->filesystem->fileExists('./cloud_tmp')) {
             $this->logger->info('<fg=blue>Existing cloud_tmp found. Deleting.');
             $this->cleanup();
         }

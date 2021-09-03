@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Magento\Deployer\Model;
 
 
+use Magento\Deployer\Util\Filesystem;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Yaml\Yaml;
 
@@ -18,18 +19,25 @@ class AppYaml implements \ArrayAccess
     private string $path;
     private LoggerInterface $logger;
     private string $filename;
+    private Filesystem $filesystem;
 
     /**
      * @param LoggerInterface $logger
+     * @param Filesystem $filesystem
      * @param string $path
      * @param string $filename
      */
-    public function __construct(LoggerInterface $logger, string $path, string $filename = '.magento.app.yaml')
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        Filesystem $filesystem,
+        string $path,
+        string $filename = '.magento.app.yaml'
+    ) {
         $this->app = Yaml::parseFile($path . '/' . $filename);
         $this->path = $path;
         $this->logger = $logger;
         $this->filename = $filename;
+        $this->filesystem = $filesystem;
     }
 
     public function addComposer2Support(): void
@@ -53,7 +61,7 @@ class AppYaml implements \ArrayAccess
 
     public function write(): void
     {
-        file_put_contents($this->path . '/' . $this->filename, Yaml::dump($this->app, 50, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
+        $this->filesystem->writeFile($this->path . '/' . $this->filename, Yaml::dump($this->app, 50, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
     }
 
     public function offsetExists($offset): bool
