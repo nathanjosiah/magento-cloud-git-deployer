@@ -32,7 +32,7 @@ class EnvYaml implements \ArrayAccess
         if (!$filesystem->fileExists($path . '/.magento.env.yaml')) {
             throw new EnvYamlNotFoundException();
         }
-        $this->env = $yamlParser->parse($path . '/.magento.env.yaml');
+        $this->env = $yamlParser->parseFile($path . '/.magento.env.yaml');
         $this->path = $path;
         $this->filesystem = $filesystem;
         $this->yamlDumper = $yamlDumper;
