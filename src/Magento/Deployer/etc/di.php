@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 use Magento\Deployer\Model\ObjectManager\FactoryProxy;
 use Magento\Deployer\Model\ObjectManager\ObjectArrayResolver;
+use Psr\Log\LogLevel;
+use Symfony\Component\Console\Output\OutputInterface;
 
 return [
     'preferences' => [
@@ -12,6 +14,16 @@ return [
         \Magento\Deployer\Model\PrepareStrategy\StrategyInterface::class => \Magento\Deployer\Model\PrepareStrategy\CompositeStrategy::class
     ],
     'types' => [
+        \Symfony\Component\Console\Logger\ConsoleLogger::class => [
+            'parameters' => [
+                'verbosityLevelMap' => [
+                    // Remap the verbosity levels for these
+                    LogLevel::INFO => OutputInterface::VERBOSITY_NORMAL,
+                    LogLevel::NOTICE => OutputInterface::VERBOSITY_VERBOSE,
+                    LogLevel::DEBUG => OutputInterface::VERBOSITY_VERY_VERBOSE,
+                ]
+            ]
+        ],
         \Symfony\Component\Yaml\Dumper::class => [
             'parameters' => [
                 'indentation' => 2
@@ -19,20 +31,12 @@ return [
         ],
         \Magento\Deployer\Model\HotfixApplier::class => [
             'parameters' => [
-                'hotfixes' => new ObjectArrayResolver([
-                    'monolog-and-es' => \Magento\Deployer\Model\Hotfix\MonologAndEs::class
-                ])
+                'hotfixes' => new ObjectArrayResolver(include __DIR__ . '/hotfixes.php')
             ]
         ],
         \Magento\Deployer\Model\ApplicationFactory::class => [
             'parameters' => [
-                'commands' => new ObjectArrayResolver([
-                    'self-update' => \Magento\Deployer\Command\SelfUpdate::class,
-                    'init' => \Magento\Deployer\Command\InitCommand::class,
-                    'prepare' => \Magento\Deployer\Command\PrepareCommand::class,
-                    'apply-hotfix' => \Magento\Deployer\Command\ApplyHotfix::class,
-                    'list-hotfix' => \Magento\Deployer\Command\ListHotfixes::class
-                ])
+                'commands' => new ObjectArrayResolver(include __DIR__ . '/commands.php')
             ]
         ],
         \Magento\Deployer\Model\PrepareStrategy\TraditionalStrategy::class => [
@@ -70,11 +74,6 @@ return [
             'parameters' => [
                 'defaultExclusions' => ['cloud_tmp', '.git', 'auth.json', 'app', '.magento.env.yaml', '.', '..']
             ]
-        ],
-        \Symfony\Component\Console\Output\Output::class => [
-            'parameters' => [
-                'verbosity' => 9999999,
-            ],
         ],
         \Magento\Deployer\Command\PrepareCommand::class => [
             'parameters' => [

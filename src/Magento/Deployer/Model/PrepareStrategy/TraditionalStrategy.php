@@ -67,8 +67,7 @@ class TraditionalStrategy {
         $this->logger->info('<fg=blue>Cloning mainline cloud project');
         $this->cloudCloner->cloneToCwd($config->getCloudBranch(), false);
 
-        $this->logger->info('<fg=blue>Replacing composer "require" with only ece-tools');
-        $this->logger->info('<fg=blue>Adding required composer repositories');
+        $this->logger->info('<fg=blue>Configuring composer');
         $composer = $this->composerFactory->create(['path' => $config->getPath()]);
         $composer->addInitialGitSupport($config->getEceVersion());
 
@@ -84,18 +83,18 @@ class TraditionalStrategy {
         $this->logger->info('<fg=blue>Writing composer.json');
         $composer->write();
 
-        $this->logger->info('<fg=blue>Running composer update');
-        $this->shellExecutor->execute('composer update --ansi --no-interaction');
+        if (array_search('monolog-and-es', $config->getHotfixes()) !== false) {
+            $this->hotfixApplier->apply('monolog-and-es');
+        } else {
+            $this->logger->info('<fg=blue>Running composer update');
+            $this->shellExecutor->execute('composer update --ansi --no-interaction');
+        }
 
         $this->logger->info('<fg=blue>Saving copy of composer.json before dev:git:update-composer to <fg=yellow> original-composer.json');
         $composer->write('original-composer.json');
 
         $this->logger->info('<fg=blue>Running <fg=yellow>dev:git:update-composer');
         $this->shellExecutor->execute('vendor/bin/ece-tools dev:git:update-composer');
-
-        if (array_search('monolog-and-es', $config->getHotfixes()) !== false) {
-            $this->hotfixApplier->apply('monolog-and-es');
-        }
 
         $this->logger->info('<fg=blue>Replacing composer autoload with mainline cloud autoload.');
         $mainlineComposer = $this->composerFactory->create(['path' => $config->getPath() . '/cloud_tmp']);

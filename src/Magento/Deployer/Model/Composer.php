@@ -43,6 +43,7 @@ class Composer implements \ArrayAccess
 
     public function addRequire(string $name, string $version): void
     {
+        $this->logger->notice('Requiring ' . $name . ':' . $version);
         $this->composer['require'][$name] = $version;
     }
 
@@ -90,10 +91,12 @@ class Composer implements \ArrayAccess
             ]
         ];
         $this->composer['repositories'][$name] = $repos[$name];
+        $this->logger->notice('Adding repo ' . $repos[$name]['url']);
     }
 
     public function stripScripts(): void
     {
+        $this->logger->notice('Stripping "scripts" from composer');
         unset($this->composer['scripts']);
     }
 
@@ -106,8 +109,12 @@ class Composer implements \ArrayAccess
         $this->addRepo('magento-cloud-docker');
         $this->addRepo('quality-patches');
         $this->disableTimeout();
+        $this->logger->notice('Removing composer autoload');
         unset($this->composer['autoload']);
-        $this->composer['require'] = ['magento/ece-tools' => $eceVersion];
+        $this->logger->notice('Removing all composer "require"');
+        $this->composer['require'] = [];
+        $this->addRequire('magento/ece-tools', $eceVersion);
+        $this->logger->notice('Replacing composer "replace" with magento/magento-cloud-components:*');
         $this->composer['replace'] = [
             'magento/magento-cloud-components' => '*'
         ];
@@ -119,13 +126,14 @@ class Composer implements \ArrayAccess
         $this->addRepo('vcs');
         $this->addRepo('ece-tools');
         $this->composer['minimum-stability'] = 'dev';
-        $this->composer['require']['magento/magento-vcs-installer'] = $version;
-        $this->composer['require']['magento/ece-tools'] = $eceVersion;
+        $this->addRequire('magento/magento-vcs-installer', $version);
+        $this->addRequire('magento/ece-tools', $eceVersion);
         $this->disableTimeout();
     }
 
     public function disableTimeout(): void
     {
+        $this->logger->notice('Disabling composer timeout');
         $this->composer['config']['process-timeout'] = 0;
     }
 
