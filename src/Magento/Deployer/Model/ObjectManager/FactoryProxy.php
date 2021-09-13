@@ -16,8 +16,8 @@ class FactoryProxy extends ValueInjection
 {
     public function toValue(ContainerInterface $container)
     {
-        $objectManager = ObjectManager::getInstance();
-        return $objectManager->create(Factory::class, ['class' => $this->value]);
+        return ObjectManager::getInstance()
+            ->create(Factory::class, ['class' => $this->value]);
     }
 
     public function isExportable(): bool

@@ -15,6 +15,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class AppYaml implements \ArrayAccess
 {
+    public const HOOK_BUILD = 'build';
     private array $app;
     private string $path;
     private LoggerInterface $logger;
@@ -47,11 +48,25 @@ class AppYaml implements \ArrayAccess
         $this->addComposerInstallToBuild();
     }
 
+    /**
+     * @param string $command
+     * @param string $hook
+     */
+    public function prependCommandToHook(string $command, string $hook): void
+    {
+        $this->app['hooks'][$hook] = $command . \PHP_EOL . $this->app['hooks'][$hook];
+    }
+
     public function addComposerInstallToBuild(): void
     {
-        $this->app['hooks']['build'] = 'set -e' . "\n"
-            . 'composer --no-ansi --no-interaction install --no-progress --prefer-dist --optimize-autoloader' . "\n"
-            . $this->app['hooks']['build'];
+        $this->prependCommandToHook(
+            'composer --no-ansi --no-interaction install --no-progress --prefer-dist --optimize-autoloader',
+            self::HOOK_BUILD
+        );
+        $this->prependCommandToHook(
+            'set -e',
+            self::HOOK_BUILD
+        );
     }
 
     public function addRelationship(string $name, string $value): void

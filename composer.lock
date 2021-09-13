@@ -4,8 +4,76 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c2530eb1a62a5b8dc59d993815f4d414",
+    "content-hash": "5eaab6221a510fdae35b2b097855cbea",
     "packages": [
+        {
+            "name": "kdyby/parse-use-statements",
+            "version": "v0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Kdyby/ParseUseStatements.git",
+                "reference": "2754bde98d919a2158951d8f84350685f8fd9efc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Kdyby/ParseUseStatements/zipball/2754bde98d919a2158951d8f84350685f8fd9efc",
+                "reference": "2754bde98d919a2158951d8f84350685f8fd9efc",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4"
+            },
+            "require-dev": {
+                "nette/tester": "~1.7"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Kdyby\\ParseUseStatements\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause",
+                "GPL-2.0",
+                "GPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Filip Procházka",
+                    "email": "filip@prochazka.su",
+                    "homepage": "http://filip-prochazka.com"
+                },
+                {
+                    "name": "David Grudl",
+                    "homepage": "https://davidgrudl.com"
+                },
+                {
+                    "name": "Nette Community",
+                    "homepage": "https://nette.org/contributors"
+                }
+            ],
+            "description": "Parse use statements for a reflection object",
+            "homepage": "http://kdyby.org",
+            "keywords": [
+                "class",
+                "expand",
+                "import",
+                "kdyby",
+                "parse",
+                "reflection",
+                "statement",
+                "usages",
+                "use",
+                "uses"
+            ],
+            "support": {
+                "email": "filip@prochazka.su",
+                "issues": "https://github.com/Kdyby/ParseUseStatements/issues",
+                "source": "https://github.com/Kdyby/ParseUseStatements/tree/master"
+            },
+            "time": "2016-09-07T21:22:38+00:00"
+        },
         {
             "name": "laminas/laminas-di",
             "version": "3.2.2",

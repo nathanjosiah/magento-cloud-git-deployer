@@ -8,7 +8,9 @@ declare(strict_types=1);
 
 namespace Magento\Deployer\Model;
 
+use Kdyby\ParseUseStatements\UseStatements;
 use Laminas\Di\InjectorInterface;
+use Magento\Deployer\Model\ObjectManager\Factory;
 use Psr\Container\ContainerInterface;
 
 class ObjectManager implements ContainerInterface
@@ -58,6 +60,8 @@ class ObjectManager implements ContainerInterface
      */
     public function create($id, array $parameters = []): object
     {
+        $parameters = $this->addFactories($id, $parameters);
+
         return $this->injector->create($id, $parameters);
     }
 
@@ -77,7 +81,7 @@ class ObjectManager implements ContainerInterface
     public function get($id)
     {
         if (!isset($this->cache[$id])) {
-            $this->cache[$id] = $this->injector->create($id);
+            $this->cache[$id] = $this->create($id);
         }
 
         return $this->cache[$id];
@@ -92,5 +96,46 @@ class ObjectManager implements ContainerInterface
     public function set(string $id, object $object): void
     {
         $this->cache[$id] = $object;
+    }
+
+    private function addFactories(string $id, array $parameters): array
+    {
+        $reflection = new \ReflectionClass($id);
+        $constructor = $reflection->getConstructor();
+        if (!$constructor) {
+            return $parameters;
+        }
+
+        $factories = [];
+        foreach ($constructor->getParameters() as $parameter) {
+            if ($parameter->getType()->getName() === Factory::class
+                && empty($parameters[$parameter->getName()])
+            ) {
+                $factories[] = $parameter->getName();
+            }
+        }
+
+        if (empty($factories)) {
+            return $parameters;
+        }
+
+        $doc = $constructor->getDocComment();
+        foreach ($factories as $factory) {
+            $useStatements = $this->get(UseStatements::class)->getUseStatements($reflection);
+            preg_match('/.*?Factory\s*<\s*(?P<type>[^>]+)\s*>\s+\$' . preg_quote($factory) . '/', $doc, $matches);
+            if (!empty($useStatements[$matches['type']])) {
+                $parameters[$factory] = $this->create(
+                    Factory::class,
+                    ['class' => $useStatements[$matches['type']]]
+                );
+            } else {
+                $parameters[$factory] = $this->create(
+                    Factory::class,
+                    ['class' => $matches['type']]
+                );
+            }
+        }
+
+        return $parameters;
     }
 }

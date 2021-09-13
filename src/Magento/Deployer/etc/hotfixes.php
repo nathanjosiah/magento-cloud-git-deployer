@@ -7,5 +7,6 @@
 declare(strict_types=1);
 
 return [
-    'monolog-and-es' => \Magento\Deployer\Model\Hotfix\MonologAndEs::class
+    'monolog-and-es' => \Magento\Deployer\Model\Hotfix\MonologAndEs::class,
+    'amqp-compile' => \Magento\Deployer\Model\Hotfix\AmqpCompile::class
 ];

@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 
-use Magento\Deployer\Model\ObjectManager\FactoryProxy;
 use Magento\Deployer\Model\ObjectManager\ObjectArrayResolver;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -39,24 +38,6 @@ return [
                 'commands' => new ObjectArrayResolver(include __DIR__ . '/commands.php')
             ]
         ],
-        \Magento\Deployer\Model\PrepareStrategy\TraditionalStrategy::class => [
-            'parameters' => [
-                'composerFactory' => new FactoryProxy(\Magento\Deployer\Model\Composer::class),
-                'appYamlFactory' => new FactoryProxy(\Magento\Deployer\Model\AppYaml::class),
-            ]
-        ],
-        \Magento\Deployer\Command\InitCommand::class => [
-            'parameters' => [
-                'composerFactory' => new FactoryProxy(\Magento\Deployer\Model\Composer::class),
-                'appYamlFactory' => new FactoryProxy(\Magento\Deployer\Model\AppYaml::class),
-            ]
-        ],
-        \Magento\Deployer\Model\PrepareStrategy\VcsStrategy::class => [
-            'parameters' => [
-                'composerFactory' => new FactoryProxy(\Magento\Deployer\Model\Composer::class),
-                'appYamlFactory' => new FactoryProxy(\Magento\Deployer\Model\AppYaml::class),
-            ]
-        ],
         \Magento\Deployer\Model\PrepareStrategy\CompositeStrategy::class => [
             'parameters' => [
                 'strategies' => new ObjectArrayResolver([
@@ -65,20 +46,9 @@ return [
                 ])
             ]
         ],
-        \Magento\Deployer\Model\Hotfix\MonologAndEs::class => [
-            'parameters' => [
-                'composerFactory' => new FactoryProxy(\Magento\Deployer\Model\Composer::class)
-            ]
-        ],
         \Magento\Deployer\Model\FilePurger::class => [
             'parameters' => [
                 'defaultExclusions' => ['cloud_tmp', '.git', 'auth.json', 'app', '.magento.env.yaml', '.', '..']
-            ]
-        ],
-        \Magento\Deployer\Command\PrepareCommand::class => [
-            'parameters' => [
-                'prepareConfigFactory' => new FactoryProxy(\Magento\Deployer\Model\Config\PrepareConfig::class),
-                'envYamlFactory' => new FactoryProxy(\Magento\Deployer\Model\EnvYaml::class),
             ]
         ],
         \Symfony\Component\Console\Application::class => [
