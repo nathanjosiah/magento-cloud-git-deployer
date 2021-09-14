@@ -43,7 +43,9 @@ class AppYaml implements \ArrayAccess
 
     public function addComposer2Support(): void
     {
+        $this->logger->notice('Setting build.flavor=none');
         $this->app['build']['flavor'] = 'none';
+        $this->logger->notice('Setting dependencies.php."composer/composer" = ^2.0');
         $this->app['dependencies']['php']['composer/composer'] = '^2.0';
         $this->addComposerInstallToBuild();
     }
@@ -54,6 +56,7 @@ class AppYaml implements \ArrayAccess
      */
     public function prependCommandToHook(string $command, string $hook): void
     {
+        $this->logger->notice('Prepending to hook "'. $hook . '": ' . $command);
         $this->app['hooks'][$hook] = $command . \PHP_EOL . $this->app['hooks'][$hook];
     }
 

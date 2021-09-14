@@ -51,10 +51,10 @@ class PathResolver
             $this->logger->error('No .git folder found in project directory. Assuming this is the wrong directory.');
             exit;
         }
-        if (!$this->filesystem->fileExists($path . '/app')) {
-            $this->logger->error('No app folder found in project directory. Assuming this is the wrong directory.');
-            exit;
-        }
+        //if (!$this->filesystem->fileExists($path . '/app')) {
+        //    $this->logger->error('No app folder found in project directory. Assuming this is the wrong directory.');
+        //    exit;
+        //}
 
         return $path;
     }

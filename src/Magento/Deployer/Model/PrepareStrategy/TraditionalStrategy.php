@@ -2,7 +2,9 @@
 
 namespace Magento\Deployer\Model\PrepareStrategy;
 
+use Composer\Util\Zip;
 use Magento\Deployer\Model\AppYaml;
+use Magento\Deployer\Model\ArtifactManager;
 use Magento\Deployer\Model\CloudCloner;
 use Magento\Deployer\Model\Composer;
 use Magento\Deployer\Model\Config\PrepareConfig;
@@ -20,6 +22,7 @@ class TraditionalStrategy {
     private HotfixApplier $hotfixApplier;
     private Factory $composerFactory;
     private Factory $appYamlFactory;
+    private ArtifactManager $artifactManager;
 
     /**
      * @param LoggerInterface $logger
@@ -29,6 +32,7 @@ class TraditionalStrategy {
      * @param HotfixApplier $hotfixApplier
      * @param Factory<Composer> $composerFactory
      * @param Factory<AppYaml> $appYamlFactory
+     * @param ArtifactManager $artifactManager
      */
     public function __construct(
         LoggerInterface $logger,
@@ -37,7 +41,8 @@ class TraditionalStrategy {
         FilePurger $filePurger,
         HotfixApplier $hotfixApplier,
         Factory $composerFactory,
-        Factory $appYamlFactory
+        Factory $appYamlFactory,
+        ArtifactManager $artifactManager
     ) {
         $this->logger = $logger;
         $this->shellExecutor = $shellExecutor;
@@ -46,6 +51,7 @@ class TraditionalStrategy {
         $this->hotfixApplier = $hotfixApplier;
         $this->composerFactory = $composerFactory;
         $this->appYamlFactory = $appYamlFactory;
+        $this->artifactManager = $artifactManager;
     }
 
     public function execute(
@@ -108,6 +114,8 @@ class TraditionalStrategy {
         $this->logger->info('<fg=blue>composer.json after dev:git:update-composer saved to composer.json');
         $localComposer->write();
         $this->cloudCloner->cleanup();
+
+        $this->artifactManager->createArchive($config->getPath(), 'artifacts.zip');
 
         $this->logger->info('<fg=green>Complete!');
     }

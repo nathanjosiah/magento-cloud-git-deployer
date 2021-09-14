@@ -3,6 +3,7 @@
 namespace Magento\Deployer\Model\PrepareStrategy;
 
 use Magento\Deployer\Model\AppYaml;
+use Magento\Deployer\Model\ArtifactManager;
 use Magento\Deployer\Model\CloudCloner;
 use Magento\Deployer\Model\Composer;
 use Magento\Deployer\Model\Config\PrepareConfig;
@@ -20,6 +21,7 @@ class VcsStrategy {
     private HotfixApplier $hotfixApplier;
     private Factory $composerFactory;
     private Factory $appYamlFactory;
+    private ArtifactManager $artifactManager;
 
     /**
      * @param LoggerInterface $logger
@@ -29,6 +31,7 @@ class VcsStrategy {
      * @param HotfixApplier $hotfixApplier
      * @param Factory<Composer> $composerFactory
      * @param Factory<AppYaml> $appYamlFactory
+     * @param ArtifactManager $artifactManager
      */
     public function __construct(
         LoggerInterface $logger,
@@ -37,7 +40,8 @@ class VcsStrategy {
         FilePurger $filePurger,
         HotfixApplier $hotfixApplier,
         Factory $composerFactory,
-        Factory $appYamlFactory
+        Factory $appYamlFactory,
+        ArtifactManager $artifactManager
     ) {
         $this->logger = $logger;
         $this->shellExecutor = $shellExecutor;
@@ -46,6 +50,7 @@ class VcsStrategy {
         $this->hotfixApplier = $hotfixApplier;
         $this->composerFactory = $composerFactory;
         $this->appYamlFactory = $appYamlFactory;
+        $this->artifactManager = $artifactManager;
     }
 
     public function execute(
@@ -135,6 +140,7 @@ class VcsStrategy {
         }
 
         $this->cloudCloner->cleanup();
+        $this->artifactManager->createArchive($config->getPath(), 'artifacts.zip');
         $this->logger->info('<fg=green>Complete!');
     }
 }

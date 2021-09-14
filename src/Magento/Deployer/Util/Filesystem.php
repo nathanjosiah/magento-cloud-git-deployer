@@ -8,18 +8,22 @@ declare(strict_types=1);
 
 namespace Magento\Deployer\Util;
 
+use Magento\Deployer\Model\ShellExecutor;
 use Psr\Log\LoggerInterface;
 
 class Filesystem
 {
     private LoggerInterface $logger;
+    private ShellExecutor $shellExecutor;
 
     /**
      * @param LoggerInterface $logger
+     * @param ShellExecutor $shellExecutor
      */
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, ShellExecutor $shellExecutor)
     {
         $this->logger = $logger;
+        $this->shellExecutor = $shellExecutor;
     }
 
     public function readFile(string $path): string
@@ -58,6 +62,16 @@ class Filesystem
     public function mkdir(string $path): bool
     {
         return mkdir($path);
+    }
+
+    public function rmdir(string $path): void
+    {
+        $this->shellExecutor->execute('rm -rf ' . escapeshellarg($path));
+    }
+
+    public function copyFile(string $from, string $to): void
+    {
+        copy($from, $to);
     }
 
     public function getCwd(): string

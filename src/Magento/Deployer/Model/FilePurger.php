@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Magento\Deployer\Model;
 
 
+use _PHPStan_0ebfea013\Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 use Magento\Deployer\Util\Filesystem;
 use Psr\Log\LoggerInterface;
 
@@ -71,6 +72,20 @@ class FilePurger
                 && !isset($excludeMap[$file])
             ) {
                 $this->shellExecutor->execute('rm -rf ' . escapeshellarg($path . '/' . $file));
+            }
+        }
+
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
+        $this->logger->debug('<fg=blue>Remaining files:');
+        foreach ($iterator as $file) {
+            if ($file->getFilename() !== '.' && $file->getFilename() !== '..')  {
+                $relative = str_replace($path . '/', '', $file->getPathname());
+                if (strpos($relative, '.git') === 0
+                    || strpos($relative, 'cloud_tmp') === 0
+                ) {
+                    continue;
+                }
+                $this->logger->debug($relative);
             }
         }
     }
