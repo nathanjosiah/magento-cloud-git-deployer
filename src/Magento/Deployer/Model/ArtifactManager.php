@@ -61,7 +61,7 @@ class ArtifactManager
             $zip->addEmptyDir('artifacts');
             $zip->addFile($artifactsDir . '/' . $file, 'artifacts/' . basename($file));
         }
-        $this->logger->info('<fg=blue>Writing artifacts archive');
+        $this->logger->info('<fg=blue>Writing artifacts archive to <fg=yellow>' . $projectPath . '/' . $archiveName);
         $zip->close();
         $this->logger->debug('Removing artifacts tmp');
         $this->filesystem->rmdir($artifactsDir);
