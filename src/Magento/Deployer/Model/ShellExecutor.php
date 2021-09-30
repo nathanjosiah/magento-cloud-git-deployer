@@ -27,6 +27,11 @@ class ShellExecutor
     {
         $this->logger->debug('Executing <fg=yellow>' . $command);
 
-        return `$command`;
+        $startTime = time();
+        $result = `$command`;
+        $elapsedTime = time() - $startTime;
+        $this->logger->debug('Finished executing <fg=yellow>' . $command . '<fg=default>. Command took <fg=blue>' . $elapsedTime . ' <fg=default>seconds to execute');
+
+        return $result;
     }
 }

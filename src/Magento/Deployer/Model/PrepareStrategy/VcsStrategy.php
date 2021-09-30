@@ -125,7 +125,7 @@ class VcsStrategy {
                 continue;
             }
             [$repo, $ref] = explode(':', $declared, 2);
-            $this->logger->info('<fg=blue>Using <fg=yellow>' . $ref . '<fg=blue> with <fg=yellow>' . $ref);
+            $this->logger->info('<fg=blue>Using <fg=yellow>' . $repo . '<fg=blue> with <fg=yellow>' . $ref);
             $composer->addVcsRepo($repo, $ref);
         }
 

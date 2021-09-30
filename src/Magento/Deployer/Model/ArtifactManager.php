@@ -53,6 +53,10 @@ class ArtifactManager
         $zip->open($projectPath . '/' . $archiveName, \ZipArchive::CREATE);
         foreach ($files as $file) {
             $this->logger->debug('Adding ' . $file . ' to archive');
+            if (!$this->filesystem->fileExists($projectPath . '/' . $file)) {
+                $this->logger->debug('File ' . $file . ' not found. Skipping.');
+                continue;
+            }
             $contents = $this->filesystem->readFile($projectPath . '/' . $file);
             $this->filesystem->writeFile(
                 $artifactsDir . '/' . basename($file),

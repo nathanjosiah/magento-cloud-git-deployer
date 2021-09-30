@@ -52,7 +52,7 @@ class Composer implements \ArrayAccess
         unset($this->composer['require'][$name]);
     }
     
-    public function addRepo(string $name): void
+    public function addRepo(string $name, bool $prepend = false, bool $canonical = null): void
     {
         $repos = [
             'connect' => [
@@ -90,8 +90,17 @@ class Composer implements \ArrayAccess
                 'only' => ['magento/quality-patches']
             ]
         ];
-        $this->composer['repositories'][$name] = $repos[$name];
-        $this->logger->notice('Adding repo ' . $repos[$name]['url']);
+
+        $repo = $repos[$name];
+        if (isset($canonical)) {
+            $repo['canonical'] = $canonical;
+        }
+        if ($prepend) {
+            $this->composer['repositories'] = array_merge([$name => $repo], $this->composer['repositories']);
+        } else {
+            $this->composer['repositories'][$name] = $repo;
+        }
+        $this->logger->notice('Adding repo ' . $repo['url']);
     }
 
     public function stripScripts(): void
