@@ -1,9 +1,7 @@
 Magento Cloud Git Deployer
 =====
 
-Because deploying git to cloud is hard
-
-The traditional [git-based cloud deployment process](https://wiki.corp.magento.com/x/KbbrBw) is long and messy. Git deployments do not get the same attention that composer deployments do. There is also the [VCS installer tool](https://github.com/magento-commerce/magento-vcs-installer) but the setup for that is also not straight-forward. 
+Git deployments do not get the same attention that composer deployments do.
 
 Also, switching between a composer-based installation to a git-based (and back again) can be very challenging. Also switching between magento versions even within the same deployment mechanism can also be hard and full of undocumented bugs and required configuration.
 
@@ -26,45 +24,33 @@ It also provides automated fixes for common issues as they arise day-to-day that
 ## Initial project setup
 1. [Install the cloud CLI](https://devdocs.magento.com/cloud/reference/cli-ref-topic.html)
 2. Clone your cloud project with git (from the [magento.cloud](https://magento.cloud/) UI) or magento-cloud (`magento-cloud project:get ...`).
-3. Decide if you want a traditional or VCS install. (Use VCS if you don't know.)
-4. Open your project in a shell/terminal and run `cloud-deployer project:init <type>`.
+4. Open your project in a shell/terminal and run `cloud-deployer project:init`.
 5. Configure setup your `auth.json` credentials.
-6. If you are using the traditional method, also ensure your `.magento.env.yaml` repo's and branches look correct.
-7. Run `cloud-deployer environment:prepare --strategy <strategy>`. (use vcs if you aren't sure). 
+7. Run `cloud-deployer environment:prepare`. 
 8. Commit all files.
 9. If you are pushing to an existing environment, you may need to follow the [steps below](#to-prepare-for-a-deployment-to-a-different-branch) before pushing your code.
 10. Push your code.
 
 ## Subsequent deployments
-1. If you are not using vcs then ensure your `.magento.env.yaml` is configured correctly. If you would like to switch to/from traditional to/from vcs then you can run `cloud-deployer project:init` and follow the instructions. 
-2. Run `cloud-deployer environment:prepare --strategy <strategy>` with the arguments needed for your deployment.
-3. Commit and push. If you are changing versions of magento or branches you may need to follow the [steps below](#to-prepare-for-a-deployment-to-a-different-branch) before pushing your code.
+1. Run `cloud-deployer environment:prepare` with the arguments needed for your deployment.
+2. Commit and push. If you are changing versions of magento or branches you may need to follow the [steps below](#to-prepare-for-a-deployment-to-a-different-branch) before pushing your code.
 
 
 # Update
 1. Run `cloud-deployer self-update`
 
 # Usage
-Before either strategy is used below, ensure you have configured your `auth.json` file in the root of your project. A stub will be created for you when you run `cloud-deployer project:init <type>`
-
-## Traditional git deployment strategy
-1. Ensure you have configured your `.magento.env.yaml` file with what you want to deploy. You may run `cloud-deployer project:init traditional` to quickly get started.
-2. Run `cloud-deployer environment:prepare` _from within your cloud folder containing your cloud project git repo_. You can optionally specify the directory you want to prepare via `cloud-deployer environment:prepare <path>`
-
-   You can exclude additional directories via the `--exclude` flag. e.g. `cloud-deployer --exclude app2 --exclude special my-project/path`. Note that this currently can only exclude top-level directories so if you want to exclude `foo/bar/baz` you have to specific `--exclude foo`.
-
-   If you have been instructed to apply a hotfix because of a current cloud issue, you may pass them as arguments such as `--hotfix monolog`. You can also specify multiple such as `--hotfix monolog --hotfix laminas`
-
+Before you follow the steps below, ensure you have configured your `auth.json` file in the root of your project. A stub will be created for you when you run `cloud-deployer project:init <type>`
 
 ## VCS installer strategy
- Ensure you have configured your `.magento.env.yaml` file with what you want to deploy. You may run `cloud-deployer project:init vcs` to quickly get started.
- Run `cloud-deployer environment:prepare --strategy vcs` _from within your cloud folder containing your cloud project git repo_. You can optionally specify the directory you want to prepare via `cloud-deployer environment:prepare --strategy vcs <path>`
+ Ensure you have configured your `.magento.env.yaml` file with what you want to deploy. You may run `cloud-deployer project:init` to quickly get started.
+ Run `cloud-deployer environment:prepare` _from within your cloud folder containing your cloud project git repo_. You can optionally specify the directory you want to prepare via `cloud-deployer environment:prepare <path>`
    This command has many different parameters available to control what is being deployed.
 
    Option|Description|Default
    ------|-----------|-------
    `--ce`|Which CE version you want to use. The format is `<organization>/<ref>`. For example, to use branch `AC-123` in repo `magento-cia/magento2ce` you would specify `--ce magento-cia/dev-AC-123`.| `magento-commerce/dev-2.4-develop`.
-   `--ee`|Same as `--ce` except for EE.<br/><br/>You may also omit the argument value to skip installing EE. For example `env:prep --strategy vcs --ce magento-cia/dev-AC-123 --ee --b2b --fastly --sp` will use a custom branch for CE and not install anything else.| `magento-commerce/dev-2.4-develop` 
+   `--ee`|Same as `--ce` except for EE.<br/><br/>You may also omit the argument value to skip installing EE. For example `env:prep --ce magento-cia/dev-AC-123 --ee --b2b --fastly --sp` will use a custom branch for CE and not install anything else.| `magento-commerce/dev-2.4-develop` 
    `--b2b`|Same as `--ee` except for B2B.|`magento-commerce/dev-release` 
    `--sp`|Same as `--ee` except for security-package.|`magento-commerce/dev-develop` 
    `--fastly`|Essentially the same as `--ee` except for fastly. The format of this argument is slightly different because this isn't an official magento extension. See `--add` for more details.|`fastly/fastly-magento2:dev-master` 
