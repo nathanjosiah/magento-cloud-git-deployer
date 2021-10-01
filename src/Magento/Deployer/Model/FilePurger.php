@@ -44,6 +44,9 @@ class FilePurger
         if (!empty($exceptions)) {
             $error = false;
             foreach ($exceptions as $excludePath) {
+                if ($excludePath === 'vendor') {
+                    continue;
+                }
                 $excludeRealPath = realpath($excludePath);
                 if (!$excludeRealPath || !$this->filesystem->fileExists($excludeRealPath)) {
                     $this->logger->error("Excluded path $excludePath does not exist");
