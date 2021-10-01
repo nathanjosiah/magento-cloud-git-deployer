@@ -67,21 +67,22 @@ class FilePurger
         array_shift($files); //..
         $excludeMap = array_combine($excludedDirs, range(1, count($excludedDirs)));
         foreach ($files as $file) {
-            // Don't accidentally delete other parts of the filesystem because of a symlink
-            if (realpath($file) === $path . '/' . $file
-                && !isset($excludeMap[$file])
-            ) {
+            if (!isset($excludeMap[$file])) {
                 $this->shellExecutor->execute('rm -rf ' . escapeshellarg($path . '/' . $file));
             }
         }
 
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
         $this->logger->debug('<fg=blue>Remaining files:');
+        if ($this->filesystem->fileExists($path . '/' . 'vendor')) {
+            $this->logger->debug('vendor');
+        }
         foreach ($iterator as $file) {
             if ($file->getFilename() !== '.' && $file->getFilename() !== '..')  {
                 $relative = str_replace($path . '/', '', $file->getPathname());
                 if (strpos($relative, '.git') === 0
                     || strpos($relative, 'cloud_tmp') === 0
+                    || strpos($relative, 'vendor') === 0
                 ) {
                     continue;
                 }

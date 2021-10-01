@@ -177,8 +177,13 @@ class PrepareCommand extends Command
         $this->hotfixApplier->validateAllExist($input->getOption('hotfix'));
 
         $config = $this->prepareConfigFactory->create();
+        $exclude = $input->getOption('exclude');
+        if ($input->getOption('strategy') === PrepareConfig::STRATEGY_VCS) {
+            $this->logger->info('<fg=blue>Excluding vendor by default for VCS strategy');
+            $exclude = array_merge($exclude, ['vendor']);
+        }
         $config->setPath($path);
-        $config->setExclude($input->getOption('exclude'));
+        $config->setExclude($exclude);
         $config->setHotfixes($input->getOption('hotfix'));
         $config->setEceVersion($input->getOption('ece-version'));
         $config->setCloudBranch($input->getOption('cloud-branch'));
