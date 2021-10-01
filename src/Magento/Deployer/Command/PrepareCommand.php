@@ -117,7 +117,7 @@ class PrepareCommand extends Command
             null,
             InputOption::VALUE_OPTIONAL,
             'Format <org>/<branch>',
-            'magento-commerce/dev-release'
+            'magento-commerce/dev-develop'
         );
         $this->addOption(
             'sp',

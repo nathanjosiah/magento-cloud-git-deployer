@@ -113,6 +113,17 @@ class VcsStrategy {
             $composer->addVcsRepo($org . '/' . $key, $ref);
         }
 
+        if ($repos['security-package']) {
+            $this->logger->info('info<fg=cyan>Hotfix for MCLOUD-8240');
+            $composer->addRequire('google/recaptcha', '^1.2');
+            $composer->addRequire('christian-riesen/base32', '^1.3');
+            $composer->addRequire('spomky-labs/otphp', '^10.0');
+            $composer->addRequire('endroid/qr-code', '^3.7');
+            $composer->addRequire('donatj/phpuseragentparser', '~0.7');
+            $composer->addRequire('2tvenom/cborencode', '^1.0');
+            $composer->addRequire('phpseclib/phpseclib', '2.0.*');
+        }
+
         $repos = [];
         $repos[] = $config->getFastly();
         $repos = array_merge($repos, $config->getAdditionalRepos() ?? []);
