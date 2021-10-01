@@ -73,10 +73,6 @@ class TraditionalStrategy {
         $this->logger->info('<fg=blue>Cloning mainline cloud project');
         $this->cloudCloner->cloneToCwd($config->getCloudBranch(), false);
 
-        if (array_search('amqp-compile', $config->getHotfixes()) !== false) {
-            $this->hotfixApplier->apply('amqp-compile');
-        }
-
         $this->logger->info('<fg=blue>Configuring composer');
         $composer = $this->composerFactory->create(['path' => $config->getPath()]);
         $composer->addInitialGitSupport($config->getEceVersion());

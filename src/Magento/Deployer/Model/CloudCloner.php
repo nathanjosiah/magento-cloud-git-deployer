@@ -41,7 +41,7 @@ class CloudCloner
         $result = $this->shellExecutor->execute('git clone --depth 1 --branch \'' . $branch . '\' git@github.com:magento/magento-cloud.git cloud_tmp 2>&1');
 
         if (strpos($result, 'fatal:') !== false) {
-            $this->logger->error('Could not clone cloud repo!');
+            $this->logger->error('Could not clone cloud repo! Error output: ' . $result);
             exit;
         }
 

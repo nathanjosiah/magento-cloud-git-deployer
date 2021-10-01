@@ -70,10 +70,6 @@ class VcsStrategy {
         $this->logger->info('<fg=blue>Cloning mainline cloud project');
         $this->cloudCloner->cloneToCwd($config->getCloudBranch(), false);
 
-        if (array_search('amqp-compile', $config->getHotfixes()) !== false) {
-            $this->hotfixApplier->apply('amqp-compile');
-        }
-
         $appYaml = $this->appYamlFactory->create(['path' => $config->getPath()]);
         if ($config->isComposer2()) {
             $this->logger->info('<fg=blue>Configuring .magento.app.yaml for composer 2.');

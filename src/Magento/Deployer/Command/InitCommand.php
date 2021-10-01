@@ -75,8 +75,9 @@ class InitCommand extends Command
     {
         $this->addArgument(
             'type',
-            InputArgument::REQUIRED,
-            'Either "vcs", "traditional", "composer"'
+            InputArgument::OPTIONAL,
+            'Either "vcs", "traditional", "composer"',
+            PrepareConfig::STRATEGY_VCS
         );
         $this->addArgument(
             'directory',

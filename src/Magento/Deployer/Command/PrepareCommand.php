@@ -95,8 +95,8 @@ class PrepareCommand extends Command
             'strategy',
             null,
             InputOption::VALUE_REQUIRED,
-            'Specify the deployment strategy to use. Default is "traditional". You can also use "VCS" to use the new VCS installer.',
-            PrepareConfig::STRATEGY_TRADITIONAL
+            'Specify the deployment strategy to use. Default is "VCS" for the new VCS installer.',
+            PrepareConfig::STRATEGY_VCS
         );
         $this->addOption(
             'ce',
