@@ -51,7 +51,7 @@ Before you follow the steps below, ensure you have configured your `auth.json` f
    ------|-----------|-------
    `--ce`|Which CE version you want to use. The format is `<organization>/<ref>`. For example, to use branch `AC-123` in repo `magento-cia/magento2ce` you would specify `--ce magento-cia/dev-AC-123`.| `magento-commerce/dev-2.4-develop`.
    `--ee`|Same as `--ce` except for EE.<br/><br/>You may also omit the argument value to skip installing EE. For example `env:prep --ce magento-cia/dev-AC-123 --ee --b2b --fastly --sp` will use a custom branch for CE and not install anything else.| `magento-commerce/dev-2.4-develop` 
-   `--b2b`|Same as `--ee` except for B2B.|`magento-commerce/dev-release` 
+   `--b2b`|Same as `--ee` except for B2B.|`magento-commerce/dev-develop` 
    `--sp`|Same as `--ee` except for security-package.|`magento-commerce/dev-develop` 
    `--fastly`|Essentially the same as `--ee` except for fastly. The format of this argument is slightly different because this isn't an official magento extension. See `--add` for more details.|`fastly/fastly-magento2:dev-master` 
    `--add` \[Supports multiple]|Allows you to add any additional extension. The format of this argument is slightly different than `--ce` or `--ee`. The format of this option is `<organization>/<repo>:<branch>`. For example, you can install ASI with `--add magento-commerce/adobe-stock-integration:dev-develop`.<br/><br/>Please notes that this can be used multiple times to add multiple repos. For example, `--add something --add something-else`.|None 
@@ -59,8 +59,9 @@ Before you follow the steps below, ensure you have configured your `auth.json` f
 
 ## To prepare for a deployment to a different branch
 
-1. Update your `.magento.env.yaml` and run `cloud-deployer environment:prepare`.
-1. If you are switching between release-lines (e.g. 2.4.x -> 2.3.x) then you will probably have to remove the existing Magento data from your instance. 
+1. Run `cloud-deployer project:init` and enter the target release (without any `-p*` identifiers. For example, if targeting 2.3.7-p3 you would enter `2.3.7`)
+2. Run `cloud-deployer environment:prepare <params>`.
+3. If you are switching between release-lines (e.g. 2.4.x -> 2.3.x) then you will probably have to remove the existing Magento data from your instance. 
    To do that, ssh into your cloud instance (via `magento-cloud ssh`) and run the following:
    ```
    rm -rf app/etc/* && rm -rf pub/media/* && rm -rf pub/static/* && rm -rf var/*
@@ -69,4 +70,4 @@ Before you follow the steps below, ensure you have configured your `auth.json` f
    ```
    
    This is the fastest and cleanest method to fully remove the existing Magento installation. The `bin/magento setup:uninstall` command is slow and leaves a bunch of files behind. It also doesn't flush redis. 
-1. Commit and push all the files.
+4. Commit and push all the files.

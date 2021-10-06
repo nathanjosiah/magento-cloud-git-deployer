@@ -114,7 +114,7 @@ class VcsStrategy {
         }
 
         if ($repos['security-package']) {
-            $this->logger->info('info<fg=cyan>Hotfix for MCLOUD-8240');
+            $this->logger->info('<fg=cyan>Hotfix for MCLOUD-8240');
             $composer->addRequire('google/recaptcha', '^1.2');
             $composer->addRequire('christian-riesen/base32', '^1.3');
             $composer->addRequire('spomky-labs/otphp', '^10.0');
