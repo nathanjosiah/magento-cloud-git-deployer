@@ -159,11 +159,7 @@ class InitCommand extends Command
         if ($type === PrepareConfig::STRATEGY_COMPOSER) {
             $this->logger->info('<fg=blue>Updating Composer');
             $composer = $this->composerFactory->create(['path' => $path]);
-            $composer->addRepo('connect');
-            $repo = $composer['repositories'];
-            $repo['repo']['canonical'] = false;
-            $repo['repo']['exclude'] = ['magento/product-enterprise-edition', 'magento/magento-cloud-metapackage'];
-            $composer['repositories'] = $repo;
+            $composer->addRepo('connect', false, false, ['magento/product-enterprise-edition', 'magento/magento-cloud-metapackage']);
 
             $question = new ChoiceQuestion('Which version? ', ['2.4.2-p1', '2.4.3-p1']);
             $version = $helper->ask($input, $output, $question);

@@ -52,7 +52,7 @@ class Composer implements \ArrayAccess
         unset($this->composer['require'][$name]);
     }
     
-    public function addRepo(string $name, bool $prepend = false, bool $canonical = null): void
+    public function addRepo(string $name, bool $prepend = false, bool $canonical = null, array $exclude = []): void
     {
         $repos = [
             'connect' => [
@@ -99,6 +99,9 @@ class Composer implements \ArrayAccess
             $this->composer['repositories'] = array_merge([$name => $repo], $this->composer['repositories']);
         } else {
             $this->composer['repositories'][$name] = $repo;
+        }
+        if ($exclude) {
+            $this->composer['repositories'][$name]['exclude'] = $exclude;
         }
         $this->logger->notice('Adding repo ' . $repo['url']);
     }

@@ -26,7 +26,7 @@ It also provides automated fixes for common issues as they arise day-to-day that
 2. Clone your cloud project with git (from the [magento.cloud](https://magento.cloud/) UI) or magento-cloud (`magento-cloud project:get ...`).
 4. Open your project in a shell/terminal and run `cloud-deployer project:init`.
 5. Configure setup your `auth.json` credentials.
-7. Run `cloud-deployer environment:prepare`. 
+7. Run `cloud-deployer environment:prepare` using the arguments you need to deploy your code. Review the `VCS installer strategy` section below for more details.  
 8. Commit all files.
 9. If you are pushing to an existing environment, you may need to follow the [steps below](#to-prepare-for-a-deployment-to-a-different-branch) before pushing your code.
 10. Push your code.
