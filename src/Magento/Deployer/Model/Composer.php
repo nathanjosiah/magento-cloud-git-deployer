@@ -134,7 +134,7 @@ class Composer implements \ArrayAccess
 
     public function addVcsPlugin(string $version, string $eceVersion): void
     {
-        $this->composer['repositories']['repo']['exclude'] = ['magento/ece-tools', 'magento/magento-vcs-installer'];
+        $this->composer['repositories']['repo']['exclude'] = ['magento/ece-tools', 'magento/magento-vcs-installer', 'magento/composer'];
         $this->addRepo('vcs');
         $this->addRepo('ece-tools');
         $this->composer['minimum-stability'] = 'dev';

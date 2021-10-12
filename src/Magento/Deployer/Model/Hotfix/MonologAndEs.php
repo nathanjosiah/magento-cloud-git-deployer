@@ -38,9 +38,9 @@ class MonologAndEs implements HotfixInterface
         $composer = $this->composerFactory->create(['path'=> getcwd()]);
         $composer->addRepo('magento-cloud-patches', true, true);
         $composer->addRepo('magento-cloud-components', true, true);
-        $composer->addRequire('magento/ece-tools', 'dev-ACMP-1263 as 2002.1.99');
-        $composer->addRequire('magento/magento-cloud-patches', 'dev-ACMP-1263 as 1.0.99');
-        $composer->addRequire('magento/magento-cloud-components', 'dev-ACMP-1263 as 1.0.99');
+        $composer->addRequire('magento/ece-tools', 'dev-develop as 2002.1.99');
+        $composer->addRequire('magento/magento-cloud-patches', 'dev-develop as 1.0.99');
+        $composer->addRequire('magento/magento-cloud-components', 'dev-develop as 1.0.99');
         $this->logger->info('<fg=cyan>Overwriting composer.json with hotfix changes');
         $composer->write();
         $this->logger->info('<fg=cyan>Running composer update');
