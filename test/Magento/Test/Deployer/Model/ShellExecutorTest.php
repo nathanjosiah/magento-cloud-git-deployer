@@ -6,28 +6,21 @@
 
 declare(strict_types=1);
 
-namespace Magento\Deployer\Model;
+namespace Magento\Test\Deployer\Model;
 
+use Magento\Deployer\Model\ShellExecutor;
+use Magento\Test\Util\LoggerSpy;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\AbstractLogger;
-use Psr\Log\LoggerInterface;
 
 class ShellExecutorTest extends TestCase
 {
     public function testExecute(): void
     {
-        $logger = new class extends AbstractLogger {
-            public array $logged = [];
-            public function log($level, $message, array $context = array())
-            {
-                $this->logged[] = $message;
-            }
-        };
-
+        $logger = new LoggerSpy();
         $executor = new ShellExecutor($logger);
         $command = 'bash -c "echo -n abc"';
         $result = $executor->execute($command);
         self::assertEquals('abc', $result);
-        self::assertStringContainsString($command, $logger->logged[0]);
+        self::assertStringContainsString($command, $logger->getLogs()[0]['message']);
     }
 }

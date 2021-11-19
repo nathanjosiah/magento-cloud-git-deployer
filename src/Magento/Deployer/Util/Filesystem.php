@@ -78,4 +78,9 @@ class Filesystem
     {
         return getcwd();
     }
+
+    public function scandir(string $directory): array
+    {
+        return scandir($directory);
+    }
 }

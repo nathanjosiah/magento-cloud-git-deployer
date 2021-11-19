@@ -2,7 +2,10 @@
   "name": "nathanjosiah/magento-cloud-git-deployer",
   "autoload": {
     "psr-4": {
-      "Magento\\": "src/Magento/"
+      "Magento\\": [
+        "src/Magento/",
+        "test/Magento/"
+      ]
     }
   },
   "authors": [
@@ -25,5 +28,8 @@
   },
   "bin": [
     "cloud-deployer"
-  ]
+  ],
+  "scripts": {
+    "test": "phpunit -c test/phpunit.xml"
+  }
 }

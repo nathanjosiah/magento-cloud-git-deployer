@@ -21,6 +21,8 @@ class ObjectManager implements ContainerInterface
 
     private InjectorInterface $injector;
 
+    private UseStatements $useStatements;
+
     /**
      * @param InjectorInterface $injector
      */
@@ -58,7 +60,7 @@ class ObjectManager implements ContainerInterface
      * @param array $parameters
      * @return T
      */
-    public function create($id, array $parameters = []): object
+    public function create(string $id, array $parameters = []): object
     {
         $parameters = $this->addFactories($id, $parameters);
 
@@ -68,7 +70,7 @@ class ObjectManager implements ContainerInterface
     /**
      * @inheritDoc
      */
-    public function has($id)
+    public function has(string $id): bool
     {
         return isset($this->cache[$id]) || $this->injector->canCreate($id);
     }
@@ -78,7 +80,7 @@ class ObjectManager implements ContainerInterface
      * @param class-string<T> $id
      * @return T
      */
-    public function get($id)
+    public function get(string $id)
     {
         if (!isset($this->cache[$id])) {
             $this->cache[$id] = $this->create($id);
@@ -120,8 +122,8 @@ class ObjectManager implements ContainerInterface
         }
 
         $doc = $constructor->getDocComment();
+        $useStatements = $this->getUseStatementsInstance()->getUseStatements($reflection);
         foreach ($factories as $factory) {
-            $useStatements = $this->get(UseStatements::class)->getUseStatements($reflection);
             preg_match('/.*?Factory\s*<\s*(?P<type>[^>]+)\s*>\s+\$' . preg_quote($factory) . '/', $doc, $matches);
             if (!empty($useStatements[$matches['type']])) {
                 $parameters[$factory] = $this->create(
@@ -131,11 +133,20 @@ class ObjectManager implements ContainerInterface
             } else {
                 $parameters[$factory] = $this->create(
                     Factory::class,
-                    ['class' => $matches['type']]
+                    ['class' => UseStatements::expandClassName($matches['type'], $reflection)]
                 );
             }
         }
 
         return $parameters;
+    }
+
+    private function getUseStatementsInstance(): UseStatements
+    {
+        if (!isset($this->useStatements)) {
+            $this->useStatements = $this->get(UseStatements::class);
+        }
+
+        return $this->useStatements;
     }
 }

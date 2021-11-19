@@ -68,7 +68,7 @@ class FilePurger
             }
         }
 
-        $files = scandir($path);
+        $files = $this->filesystem->scandir($path);
         array_shift($files); //.
         array_shift($files); //..
         $excludeMap = array_combine($excludedDirs, range(1, count($excludedDirs)));
