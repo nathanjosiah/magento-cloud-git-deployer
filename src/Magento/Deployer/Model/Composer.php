@@ -88,7 +88,12 @@ class Composer implements \ArrayAccess
                 'type' => 'git',
                 'url' => 'git@github.com:magento/quality-patches.git',
                 'only' => ['magento/quality-patches']
-            ]
+            ],
+            'adobe-ims' => [
+                'type' => 'git',
+                'url' => 'git@github.com:magento/adobe-ims.git',
+                'only' => ['magento/adobe-ims']
+            ],
         ];
 
         $repo = $repos[$name];
@@ -158,6 +163,14 @@ class Composer implements \ArrayAccess
             'url' => 'git@github.com:' . $repo . '.git',
             'ref' => $ref
         ];
+
+        // workaround for MCLOUD-8329
+        if (strpos($repo, 'adobe-stock-integration') !== false) {
+            $this->logger->info('<fg=cyan>ASI requires magento/adobe-ims repo. Adding.');
+            $this->addRepo('adobe-ims');
+            $this->logger->info('<fg=cyan>ASI requires astock/stock-api-libphp. Adding.');
+            $this->addRequire('astock/stock-api-libphp', '*');
+        }
     }
 
     public function write(string $filename = 'composer.json'): void
