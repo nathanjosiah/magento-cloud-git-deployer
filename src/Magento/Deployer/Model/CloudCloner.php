@@ -8,25 +8,24 @@ declare(strict_types=1);
 
 namespace Magento\Deployer\Model;
 
-
 use Magento\Deployer\Util\Filesystem;
 use Psr\Log\LoggerInterface;
 
 class CloudCloner
 {
     private LoggerInterface $logger;
-    private ShellExecutor $shellExecutor;
+    private ShellCommand $shellCommand;
     private Filesystem $filesystem;
 
     /**
      * @param LoggerInterface $logger
-     * @param ShellExecutor $shellExecutor
+     * @param ShellCommand $shellCommand
      * @param Filesystem $filesystem
      */
-    public function __construct(LoggerInterface $logger, ShellExecutor $shellExecutor, Filesystem $filesystem)
+    public function __construct(LoggerInterface $logger, ShellCommand $shellCommand, Filesystem $filesystem)
     {
         $this->logger = $logger;
-        $this->shellExecutor = $shellExecutor;
+        $this->shellCommand = $shellCommand;
         $this->filesystem = $filesystem;
     }
 
@@ -38,15 +37,15 @@ class CloudCloner
         }
 
         $this->logger->info('<fg=blue>Cloning cloud repo with branch <fg=yellow>'. $branch);
-        $result = $this->shellExecutor->execute('git clone --depth 1 --branch \'' . $branch . '\' git@github.com:magento/magento-cloud.git cloud_tmp 2>&1');
+        $result = $this->shellCommand->executeCommandWithArguments('clone_cloud_to_tmp', ['branch' => $branch]);
 
         if (strpos($result, 'fatal:') !== false) {
             $this->logger->error('Could not clone cloud repo! Error output: ' . $result);
-            exit;
+            throw new \RuntimeException('There was an error while cloning the repo: ' . $result);
         }
 
         $this->logger->info('<fg=blue>Transferring mainline files.');
-        $this->shellExecutor->execute('rsync -av cloud_tmp/ . --exclude=.git --exclude=.github');
+        $this->shellCommand->executeCommandWithArguments('sync_cloud_tmp_to_cwd', []);
 
         if ($cleanup) {
             $this->cleanup();
@@ -55,9 +54,9 @@ class CloudCloner
 
     public function cleanup(): void
     {
-        if ($this->shellExecutor->execute('rm -rf ./cloud_tmp')) {
+        if ($this->shellCommand->executeCommandWithArguments('delete_cloud_tmp', [])) {
             $this->logger->error('Could not remove cloud_tmp');
-            exit;
+            throw new \RuntimeException('Could not remove cloud_tmp');
         }
     }
 }
