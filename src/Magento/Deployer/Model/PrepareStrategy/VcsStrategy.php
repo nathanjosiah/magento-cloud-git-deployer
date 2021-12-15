@@ -139,6 +139,10 @@ class VcsStrategy {
         $composer->write();
         unset($composer);
 
+        if (array_search('di-compile', $config->getHotfixes()) !== false) {
+            $this->hotfixApplier->apply('di-compile');
+        }
+
         if (array_search('monolog-and-es', $config->getHotfixes()) !== false) {
             $this->hotfixApplier->apply('monolog-and-es');
         } else {

@@ -161,7 +161,7 @@ class InitCommand extends Command
             $composer = $this->composerFactory->create(['path' => $path]);
             $composer->addRepo('connect', false, false, ['magento/product-enterprise-edition', 'magento/magento-cloud-metapackage']);
 
-            $question = new ChoiceQuestion('Which version? ', ['2.4.2-p1', '2.4.3-p1']);
+            $question = new ChoiceQuestion('Which version? ', ['2.3.7-p1','2.3.7-p3','2.4.2-p1', '2.4.3-p1']);
             $version = $helper->ask($input, $output, $question);
             if ($version === '2.3.7-p1') {
                 $composer->addRequire("magento/ece-tools", "^2002.1.0");
@@ -169,6 +169,10 @@ class InitCommand extends Command
                 $composer->addRequire("fastly/magento2", "^1.2.34");
                 $composer->removeRequire('magento/magento-cloud-metapackage');
                 $composer->addRequire("magento/product-enterprise-edition", "2.3.7-p1");
+            } elseif ($version === '2.3.7-p3') {
+                $composer->addRequire('magento/composer-root-update-plugin','~1.1');
+                $composer->addRequire('magento/magento-cloud-metapackage','2.3.7');
+                $composer->addRequire("magento/product-enterprise-edition", "2.3.7");
             } elseif ($version === '2.4.2-p1') {
                 $composer->addRequire("magento/ece-tools", "^2002.1.0");
                 $composer->addRequire("magento/module-paypal-on-boarding", "~100.4.0");
