@@ -121,7 +121,7 @@ class VcsStrategy {
             $composer->addRequire('endroid/qr-code', '^3.7');
             $composer->addRequire('donatj/phpuseragentparser', '~0.7');
             $composer->addRequire('2tvenom/cborencode', '^1.0');
-            $composer->addRequire('phpseclib/phpseclib', '2.0.*');
+            $composer->addRequire('phpseclib/phpseclib', '^3.0');
         }
 
         $repos = [];
