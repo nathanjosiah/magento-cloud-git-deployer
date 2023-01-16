@@ -118,7 +118,7 @@ class VcsStrategy {
             $composer->addRequire('google/recaptcha', '^1.2');
             $composer->addRequire('christian-riesen/base32', '^1.3');
             $composer->addRequire('spomky-labs/otphp', '^10.0');
-            $composer->addRequire('endroid/qr-code', '^3.7');
+            $composer->addRequire('endroid/qr-code', '^4.0');
             $composer->addRequire('donatj/phpuseragentparser', '~0.7');
             $composer->addRequire('2tvenom/cborencode', '^1.0');
             $composer->addRequire('phpseclib/phpseclib', '^3.0');
