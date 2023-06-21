@@ -19,7 +19,7 @@
     "symfony/console": "^5.0",
     "symfony/yaml": "^3.3||^4.0",
     "ext-json": "*",
-    "laminas/laminas-di": "^3.2",
+    "laminas/laminas-di": "^3.3",
     "nathanjosiah/parse-use-statements": "0.3.0",
     "ext-zip": "*"
   },
