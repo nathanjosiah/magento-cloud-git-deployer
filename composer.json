@@ -16,7 +16,7 @@
   ],
   "require": {
     "php": ">=7.4",
-    "symfony/console": "6.3.x-dev",
+    "symfony/console": "5.3.x-dev",
     "symfony/yaml": "^3.3||^4.0",
     "ext-json": "*",
     "laminas/laminas-di": "^3.3",
