@@ -16,10 +16,11 @@
   ],
   "require": {
     "php": ">=7.4",
-    "symfony/console": "5.3.x-dev",
+    "symfony/console": "^6",
+    "psr/log": "^3.",
     "symfony/yaml": "^3.3||^4.0",
     "ext-json": "*",
-    "laminas/laminas-di": "^3.3",
+    "laminas/laminas-di": "^3.12",
     "nathanjosiah/parse-use-statements": "0.3.0",
     "ext-zip": "*"
   },
