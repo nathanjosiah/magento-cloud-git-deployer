@@ -26,7 +26,7 @@ return [
         \Magento\Deployer\Model\ShellCommand::class => [
             'parameters' => [
                 'commands' => [
-                    'clone_cloud_to_tmp' => 'git clone --depth 1 --branch {{branch}} git@github.com:magento/magento-cloud.git cloud_tmp 2>&1',
+                    'clone_cloud_to_tmp' => 'git clone --depth 1 --branch {{branch}} git@github.com:magento-commerce/magento-cloud.git cloud_tmp 2>&1',
                     'sync_cloud_tmp_to_cwd' => 'rsync -av cloud_tmp/ . --exclude=.git --exclude=.github',
                     'delete_cloud_tmp' => 'rm -rf ./cloud_tmp',
                 ]
